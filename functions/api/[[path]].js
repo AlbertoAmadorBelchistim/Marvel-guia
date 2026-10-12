@@ -1,27 +1,27 @@
 // API de cuentas y progreso para la guía Marvel (Cloudflare Pages Functions + D1).
 //
-//   POST   /api/register   {username, password}        -> {token, username}
-//   POST   /api/login      {username, password}        -> {token, username}
-//   POST   /api/logout                                 -> {ok}
-//   GET    /api/me                                     -> {username}
-//   GET    /api/progress                               -> {watched, country, updated_at}
-//   PUT    /api/progress   {watched, country}          -> {ok, updated_at}
-//   DELETE /api/account    {password}                  -> {ok}
+//   POST   /api/google     {credential}               -> {token, email, name}
+//   POST   /api/logout                                -> {ok}
+//   GET    /api/me                                    -> {email, name}
+//   GET    /api/progress                              -> {watched, country, updated_at}
+//   PUT    /api/progress   {watched, country}         -> {ok, updated_at}
+//   DELETE /api/account                               -> {ok}
 //
-// Autenticación: token opaco en la cabecera "Authorization: Bearer <token>".
-// En la base de datos solo se guarda el SHA-256 del token, nunca el token.
-// Contraseñas: PBKDF2-SHA256, 100 000 iteraciones (máximo de Workers), sal de 16 bytes.
+// Inicio de sesión con Google: la página obtiene un ID token (JWT firmado por Google)
+// y la API lo verifica con las claves públicas de Google (RS256), comprobando emisor,
+// audiencia (nuestro Client ID), caducidad y que el correo esté verificado.
+// No se guarda ninguna contraseña. La sesión propia es un token opaco aleatorio;
+// en la base de datos solo se guarda su SHA-256.
 
 const SESSION_DAYS = 180;
-const PBKDF2_ITER = 100000;
 const MAX_WATCHED = 500;
 const MAX_KEY_LEN = 120;
-const FAIL_LIMIT = 8;            // intentos fallidos por usuario…
-const IP_FAIL_LIMIT = 30;        // …y por IP (más alto: varias personas comparten conexión)…
-const FAIL_WINDOW_MS = 15 * 60e3; // …por ventana de 15 minutos
-const USERNAME_RE = /^[a-zA-Z0-9_.-]{3,32}$/;
+const GOOGLE_ISSUERS = ["accounts.google.com", "https://accounts.google.com"];
+const DEFAULT_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs";
+const CLOCK_SKEW_S = 120;
 
 const enc = new TextEncoder();
+const dec = new TextDecoder();
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -31,40 +31,22 @@ function json(data, status = 200) {
 }
 const err = (status, code, message) => json({ error: code, message }, status);
 
-function b64(bytes) {
-  let s = "";
-  for (const b of new Uint8Array(bytes)) s += String.fromCharCode(b);
-  return btoa(s);
-}
-function unb64(str) {
-  const s = atob(str);
-  const out = new Uint8Array(s.length);
-  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+function b64urlToBytes(s) {
+  s = s.replace(/-/g, "+").replace(/_/g, "/");
+  s += "===".slice((s.length + 3) % 4);
+  const bin = atob(s);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
 }
-function randomBytes(n) {
-  return crypto.getRandomValues(new Uint8Array(n));
-}
-function toHex(bytes) {
-  return [...new Uint8Array(bytes)].map((b) => b.toString(16).padStart(2, "0")).join("");
+function bytesToB64url(bytes) {
+  let s = "";
+  for (const b of new Uint8Array(bytes)) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 async function sha256Hex(text) {
-  return toHex(await crypto.subtle.digest("SHA-256", enc.encode(text)));
-}
-async function hashPassword(password, salt) {
-  const key = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", hash: "SHA-256", salt, iterations: PBKDF2_ITER },
-    key,
-    256
-  );
-  return b64(bits);
-}
-function safeEqual(a, b) {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
+  const d = await crypto.subtle.digest("SHA-256", enc.encode(text));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 async function readJson(request) {
@@ -77,56 +59,74 @@ async function readJson(request) {
   }
 }
 
-function validCredentials(body) {
-  const username = typeof body.username === "string" ? body.username.trim() : "";
-  const password = typeof body.password === "string" ? body.password : "";
-  if (!USERNAME_RE.test(username)) return { error: "El usuario debe tener entre 3 y 32 caracteres: letras, números, punto, guion o guion bajo." };
-  if (password.length < 8 || password.length > 200) return { error: "La contraseña debe tener al menos 8 caracteres." };
-  return { username, password };
+// --- verificación del ID token de Google ------------------------------------------
+let jwksCache = { url: null, keys: null, until: 0 };
+async function googleKeys(url, forceRefresh) {
+  const now = Date.now();
+  if (!forceRefresh && jwksCache.url === url && jwksCache.keys && now < jwksCache.until) return jwksCache.keys;
+  const res = await fetch(url, { cf: { cacheTtl: 3600 } });
+  if (!res.ok) throw new Error("jwks_unavailable");
+  const body = await res.json();
+  const m = (res.headers.get("cache-control") || "").match(/max-age=(\d+)/);
+  jwksCache = { url, keys: body.keys || [], until: now + Math.min(Number(m ? m[1] : 3600), 86400) * 1000 };
+  return jwksCache.keys;
 }
 
-// --- límite de intentos fallidos ---------------------------------------------
-async function isLocked(db, key, now, limit = FAIL_LIMIT) {
-  const row = await db.prepare("SELECT fails, window_start FROM login_attempts WHERE key = ?").bind(key).first();
-  return !!row && now - row.window_start < FAIL_WINDOW_MS && row.fails >= limit;
-}
-async function registerFail(db, key, now) {
-  await db
-    .prepare(
-      `INSERT INTO login_attempts (key, fails, window_start) VALUES (?1, 1, ?2)
-       ON CONFLICT(key) DO UPDATE SET
-         fails = CASE WHEN ?2 - window_start >= ?3 THEN 1 ELSE fails + 1 END,
-         window_start = CASE WHEN ?2 - window_start >= ?3 THEN ?2 ELSE window_start END`
-    )
-    .bind(key, now, FAIL_WINDOW_MS)
-    .run();
-}
-async function clearFails(db, key) {
-  await db.prepare("DELETE FROM login_attempts WHERE key = ?").bind(key).run();
+async function verifyGoogleIdToken(idToken, clientId, jwksUrl) {
+  const parts = String(idToken || "").split(".");
+  if (parts.length !== 3) throw new Error("malformed");
+  const header = JSON.parse(dec.decode(b64urlToBytes(parts[0])));
+  const payload = JSON.parse(dec.decode(b64urlToBytes(parts[1])));
+  if (header.alg !== "RS256" || !header.kid) throw new Error("bad_alg");
+
+  let jwk = (await googleKeys(jwksUrl, false)).find((k) => k.kid === header.kid);
+  if (!jwk) jwk = (await googleKeys(jwksUrl, true)).find((k) => k.kid === header.kid); // rotación de claves
+  if (!jwk) throw new Error("unknown_kid");
+
+  const key = await crypto.subtle.importKey(
+    "jwk",
+    { kty: jwk.kty, n: jwk.n, e: jwk.e, alg: "RS256", ext: true },
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["verify"]
+  );
+  const ok = await crypto.subtle.verify(
+    "RSASSA-PKCS1-v1_5",
+    key,
+    b64urlToBytes(parts[2]),
+    enc.encode(parts[0] + "." + parts[1])
+  );
+  if (!ok) throw new Error("bad_signature");
+
+  const nowS = Math.floor(Date.now() / 1000);
+  if (!GOOGLE_ISSUERS.includes(payload.iss)) throw new Error("bad_issuer");
+  if (payload.aud !== clientId) throw new Error("bad_audience");
+  if (typeof payload.exp !== "number" || payload.exp + CLOCK_SKEW_S < nowS) throw new Error("expired");
+  if (typeof payload.iat === "number" && payload.iat - CLOCK_SKEW_S > nowS) throw new Error("not_yet_valid");
+  if (!payload.sub || !payload.email) throw new Error("missing_claims");
+  if (payload.email_verified !== true && payload.email_verified !== "true") throw new Error("email_not_verified");
+  return payload;
 }
 
 // --- sesiones -------------------------------------------------------------------
 async function createSession(db, userId, now) {
-  const token = b64(randomBytes(32)).replace(/[+/=]/g, (c) => ({ "+": "-", "/": "_", "=": "" })[c]);
-  const tokenHash = await sha256Hex(token);
+  const token = bytesToB64url(crypto.getRandomValues(new Uint8Array(32)));
   await db
     .prepare("INSERT INTO sessions (token_hash, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)")
-    .bind(tokenHash, userId, now, now + SESSION_DAYS * 86400e3)
+    .bind(await sha256Hex(token), userId, now, now + SESSION_DAYS * 86400e3)
     .run();
   return token;
 }
 async function currentUser(request, db, now) {
-  const auth = request.headers.get("authorization") || "";
-  const m = auth.match(/^Bearer\s+([A-Za-z0-9_-]{20,100})$/);
+  const m = (request.headers.get("authorization") || "").match(/^Bearer\s+([A-Za-z0-9_-]{20,100})$/);
   if (!m) return null;
-  const tokenHash = await sha256Hex(m[1]);
   const row = await db
     .prepare(
-      `SELECT u.id, u.username, s.expires_at, s.token_hash
+      `SELECT u.id, u.email, u.name, s.expires_at, s.token_hash
          FROM sessions s JOIN users u ON u.id = s.user_id
         WHERE s.token_hash = ?`
     )
-    .bind(tokenHash)
+    .bind(await sha256Hex(m[1]))
     .first();
   if (!row || row.expires_at < now) return null;
   return row;
@@ -145,9 +145,7 @@ function cleanWatched(list) {
   }
   return out;
 }
-function cleanCountry(c) {
-  return typeof c === "string" && /^[a-z]{2}$/.test(c) ? c : null;
-}
+const cleanCountry = (c) => (typeof c === "string" && /^[a-z]{2}$/.test(c) ? c : null);
 
 // --- rutas ------------------------------------------------------------------------
 export async function onRequest(context) {
@@ -159,61 +157,41 @@ export async function onRequest(context) {
   const method = request.method.toUpperCase();
   const now = Date.now();
 
-  // Solo peticiones del propio sitio con cuerpo JSON (evita CSRF por formularios ajenos).
-  if (method !== "GET" && method !== "HEAD") {
-    const ct = request.headers.get("content-type") || "";
-    if (method !== "POST" || path !== "/logout") {
-      if (!ct.includes("application/json")) return err(415, "bad_type", "Se esperaba JSON.");
-    }
+  // Solo cuerpos JSON en las escrituras (un formulario de otra web no puede enviarlos sin CORS).
+  if (method !== "GET" && method !== "HEAD" && !(method === "POST" && path === "/logout") && method !== "DELETE") {
+    if (!(request.headers.get("content-type") || "").includes("application/json"))
+      return err(415, "bad_type", "Se esperaba JSON.");
   }
 
   try {
-    if (path === "/register" && method === "POST") {
-      const ip = request.headers.get("cf-connecting-ip") || "unknown";
-      const ipKey = "reg:" + ip;
-      if (await isLocked(db, ipKey, now, 10)) return err(429, "locked", "Demasiados registros desde esta conexión. Prueba en unos minutos.");
-      const creds = validCredentials(await readJson(request));
-      if (creds.error) return err(400, "invalid", creds.error);
-      const exists = await db.prepare("SELECT 1 FROM users WHERE username = ?").bind(creds.username).first();
-      if (exists) return err(409, "taken", "Ese nombre de usuario ya existe.");
-      const salt = randomBytes(16);
-      const id = crypto.randomUUID();
-      await db
-        .prepare("INSERT INTO users (id, username, pass_hash, pass_salt, created_at) VALUES (?, ?, ?, ?, ?)")
-        .bind(id, creds.username, await hashPassword(creds.password, salt), b64(salt), now)
-        .run();
-      await registerFail(db, ipKey, now); // cuenta registros por IP con el mismo contador
-      const token = await createSession(db, id, now);
-      return json({ token, username: creds.username }, 201);
-    }
-
-    if (path === "/login" && method === "POST") {
+    if (path === "/google" && method === "POST") {
+      const clientId = env.GOOGLE_CLIENT_ID;
+      if (!clientId) return err(500, "no_client_id", "Falta configurar el inicio de sesión con Google.");
       const body = await readJson(request);
-      const username = typeof body.username === "string" ? body.username.trim() : "";
-      const password = typeof body.password === "string" ? body.password : "";
-      const ip = request.headers.get("cf-connecting-ip") || "unknown";
-      const userKey = "user:" + username.toLowerCase();
-      const ipKey = "ip:" + ip;
-      if ((await isLocked(db, userKey, now)) || (await isLocked(db, ipKey, now, IP_FAIL_LIMIT)))
-        return err(429, "locked", "Demasiados intentos fallidos. Espera 15 minutos.");
-      const user = USERNAME_RE.test(username)
-        ? await db.prepare("SELECT id, username, pass_hash, pass_salt FROM users WHERE username = ?").bind(username).first()
-        : null;
-      // Se calcula el hash aunque el usuario no exista, para no revelar qué usuarios existen por el tiempo de respuesta.
-      const salt = user ? unb64(user.pass_salt) : randomBytes(16);
-      const hash = await hashPassword(password.slice(0, 200), salt);
-      if (!user || !safeEqual(hash, user.pass_hash)) {
-        await registerFail(db, userKey, now);
-        await registerFail(db, ipKey, now);
-        return err(401, "bad_credentials", "Usuario o contraseña incorrectos.");
+      let claims;
+      try {
+        claims = await verifyGoogleIdToken(body.credential, clientId, env.GOOGLE_JWKS_URL || DEFAULT_JWKS_URL);
+      } catch (e) {
+        console.warn("google token rechazado:", e && e.message);
+        return err(401, "bad_google_token", "No se ha podido verificar el inicio de sesión con Google. Inténtalo de nuevo.");
       }
-      await clearFails(db, userKey);
+      const email = String(claims.email).toLowerCase().slice(0, 254);
+      const name = claims.name ? String(claims.name).slice(0, 120) : null;
+      let user = await db.prepare("SELECT id FROM users WHERE google_sub = ?").bind(String(claims.sub)).first();
+      if (user) {
+        await db.prepare("UPDATE users SET email = ?, name = ?, last_login = ? WHERE id = ?").bind(email, name, now, user.id).run();
+      } else {
+        user = { id: crypto.randomUUID() };
+        await db
+          .prepare("INSERT INTO users (id, google_sub, email, name, created_at, last_login) VALUES (?, ?, ?, ?, ?, ?)")
+          .bind(user.id, String(claims.sub), email, name, now, now)
+          .run();
+      }
       await db.prepare("DELETE FROM sessions WHERE user_id = ? AND expires_at < ?").bind(user.id, now).run();
       const token = await createSession(db, user.id, now);
-      return json({ token, username: user.username });
+      return json({ token, email, name });
     }
 
-    // A partir de aquí, todo requiere sesión.
     const user = await currentUser(request, db, now);
 
     if (path === "/logout" && method === "POST") {
@@ -223,9 +201,7 @@ export async function onRequest(context) {
 
     if (!user) return err(401, "unauthorized", "Inicia sesión de nuevo.");
 
-    if (path === "/me" && method === "GET") {
-      return json({ username: user.username });
-    }
+    if (path === "/me" && method === "GET") return json({ email: user.email, name: user.name });
 
     if (path === "/progress" && method === "GET") {
       const row = await db.prepare("SELECT watched, country, updated_at FROM progress WHERE user_id = ?").bind(user.id).first();
@@ -240,22 +216,17 @@ export async function onRequest(context) {
       const body = await readJson(request);
       const watched = cleanWatched(body.watched);
       if (!watched) return err(400, "invalid", "Formato de progreso no válido.");
-      const country = cleanCountry(body.country);
       await db
         .prepare(
           `INSERT INTO progress (user_id, watched, country, updated_at) VALUES (?1, ?2, ?3, ?4)
            ON CONFLICT(user_id) DO UPDATE SET watched = ?2, country = COALESCE(?3, country), updated_at = ?4`
         )
-        .bind(user.id, JSON.stringify(watched), country, now)
+        .bind(user.id, JSON.stringify(watched), cleanCountry(body.country), now)
         .run();
       return json({ ok: true, updated_at: now });
     }
 
     if (path === "/account" && method === "DELETE") {
-      const body = await readJson(request);
-      const full = await db.prepare("SELECT pass_hash, pass_salt FROM users WHERE id = ?").bind(user.id).first();
-      const hash = await hashPassword(String(body.password || "").slice(0, 200), unb64(full.pass_salt));
-      if (!safeEqual(hash, full.pass_hash)) return err(401, "bad_credentials", "Contraseña incorrecta.");
       await db.batch([
         db.prepare("DELETE FROM progress WHERE user_id = ?").bind(user.id),
         db.prepare("DELETE FROM sessions WHERE user_id = ?").bind(user.id),

@@ -18,14 +18,14 @@ Página estática con 116 películas y series de Marvel comparadas con los arcos
 public/index.html           # la página entera: HTML, CSS, JS y datos en un solo archivo
 public/_headers             # cabeceras de Cloudflare Pages (caché y seguridad)
 functions/api/[[path]].js   # API de cuentas y progreso (Pages Functions)
-migrations/0001_init.sql    # esquema de la base de datos D1
-wrangler.toml               # configuración del proyecto y binding de D1 (DB)
+migrations/                 # esquema de la base de datos D1 (0002 es el vigente)
+wrangler.toml               # configuración: binding de D1 (DB) y GOOGLE_CLIENT_ID
 ```
 
 No hay build ni dependencias de producción. Para probarla en local con la API y una base de datos de prueba:
 
 ```bash
-npx wrangler d1 execute marvel-guia --local --file migrations/0001_init.sql
+npx wrangler d1 execute marvel-guia --local --file migrations/0002_google.sql
 npx wrangler pages dev
 ```
 
@@ -41,20 +41,22 @@ npx wrangler pages dev
 ## Cuentas y datos del usuario
 
 - **Sin cuenta**, lo marcado se guarda solo en el navegador (`localStorage`).
-- **Con cuenta** (usuario y contraseña), lo marcado y el país se guardan en D1 y se recuperan en cualquier dispositivo. Al iniciar sesión, lo marcado sin cuenta en ese navegador se suma a la cuenta. Al volver a la pestaña se traen los cambios hechos en otro dispositivo.
+- **Con Google** («Continuar con Google» en el panel), lo marcado y el país se guardan en D1 y se recuperan en cualquier dispositivo. Al entrar, lo marcado sin cuenta en ese navegador se suma a la cuenta. Al volver a la pestaña se traen los cambios hechos en otro dispositivo.
 - Al cerrar sesión se borra lo marcado de ese navegador, para que no lo vea quien use el equipo después.
-- Cada usuario solo puede leer y escribir su propio progreso.
+- Cada usuario solo puede leer y escribir su propio progreso, y puede borrar su cuenta y todos sus datos desde la página.
+- Lo marcado en el artefacto de Claude se trae con su botón «Llevar mis marcadas…», que abre la web con `#importar=…`.
+
+Qué se guarda por usuario: identificador de Google (`sub`), correo verificado, nombre, fechas de alta y último acceso, lo marcado y el país. **No se guarda ninguna contraseña.**
 
 Seguridad:
 
-- Contraseñas con PBKDF2-SHA256 (100 000 iteraciones) y sal aleatoria; nunca se guardan en claro.
+- La página obtiene un ID token de Google (Google Identity Services) y la API lo verifica con las claves públicas de Google: firma RS256, emisor, audiencia (nuestro Client ID), caducidad y correo verificado.
 - Sesiones con token aleatorio de 256 bits, enviado como `Authorization: Bearer`; en la base de datos solo se guarda su SHA-256. Caducan a los 180 días.
-- Bloqueo de 15 minutos tras 8 intentos fallidos por usuario o 30 por IP.
-- La API solo acepta cuerpos JSON, lo que impide que un formulario de otra web haga peticiones en nombre del usuario.
-- El usuario puede borrar su cuenta y todos sus datos desde la propia página.
-- No hay recuperación de contraseña: no se pide correo electrónico.
+- Las escrituras exigen cuerpo JSON y la sesión no va en cookies, así que otra web no puede actuar en nombre del usuario.
 
-API: `POST /api/register`, `POST /api/login`, `POST /api/logout`, `GET /api/me`, `GET|PUT /api/progress`, `DELETE /api/account`.
+El Client ID de Google es público y está en `wrangler.toml` y en `public/index.html`. Para probar en otro dominio hay que añadirlo en *Orígenes de JavaScript autorizados* del cliente OAuth en Google Cloud.
+
+API: `POST /api/google`, `POST /api/logout`, `GET /api/me`, `GET|PUT /api/progress`, `DELETE /api/account`.
 
 ## Aviso
 

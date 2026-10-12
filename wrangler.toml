@@ -6,3 +6,6 @@ compatibility_date = "2025-09-01"
 binding = "DB"
 database_name = "marvel-guia"
 database_id = "f937a739-ceb5-4c2d-8d44-a9e7763d38bf"
+
+[vars]
+GOOGLE_CLIENT_ID = "965357339286-prasf832d5odh57em5nmgrhc1kmoqn48.apps.googleusercontent.com"
