@@ -1,0 +1,8 @@
+name = "marvel-guia"
+pages_build_output_dir = "./public"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "marvel-guia"
+database_id = "f937a739-ceb5-4c2d-8d44-a9e7763d38bf"

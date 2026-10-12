@@ -122,6 +122,21 @@ section.block .intro{color:var(--muted);max-width:64ch;margin:0 0 16px}
 .seen .t::after{content:" ✓";color:var(--magenta);font-weight:700;opacity:1}
 .watch{border:1.5px solid var(--line);background:transparent;color:var(--muted);border-radius:50%;width:26px;height:26px;line-height:1;font-size:.85rem;font-weight:700;padding:0}
 .watch[aria-pressed="true"]{border-color:var(--magenta);background:var(--magenta);color:#fff}
+.acct{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
+.acct-line{margin:0 0 8px;font-size:.88rem;color:var(--muted)}
+.acct-line strong{color:var(--ink)}
+.acct-state{white-space:nowrap}
+.mini.quiet{border-color:var(--line);color:var(--muted)}
+dialog.auth{border:3px solid var(--ink);border-radius:4px;background:var(--card);color:var(--ink);padding:20px;width:min(92vw,380px)}
+dialog.auth::backdrop{background:rgba(0,0,0,.45)}
+dialog.auth h2{font:900 1.6rem/1 var(--display);margin:0 0 14px}
+dialog.auth label{display:block;font-size:.85rem;font-weight:600;margin:10px 0 4px}
+dialog.auth input{width:100%;padding:9px 11px;border:2px solid var(--ink);border-radius:3px;background:var(--paper);color:var(--ink);font:inherit}
+dialog.auth input:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+dialog.auth .acts{margin-top:14px}
+.auth-hint{font-size:.8rem;color:var(--muted);margin:8px 0 0}
+.auth-err{color:var(--magenta);font-size:.88rem;font-weight:600;min-height:1.2em;margin:8px 0 0}
+.linkbtn{background:none;border:0;padding:0;margin-top:12px;color:var(--ink);text-decoration:underline;font-size:.85rem;cursor:pointer}
 .sync{font-size:.78rem;color:var(--muted);margin-top:8px}
 .need{font-weight:600}
 .need.n3{color:var(--magenta)}
@@ -251,6 +266,23 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
 
 <footer><div class="wrap">Guía personal, sin afiliación con Marvel ni Disney. Actualizada en septiembre de 2026.</div></footer>
 
+
+<dialog id="authDlg" class="auth" aria-labelledby="authTitle">
+  <form id="authForm" data-auth="login" novalidate>
+    <h2 id="authTitle">Iniciar sesión</h2>
+    <label for="authUser">Usuario</label>
+    <input id="authUser" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required minlength="3" maxlength="32" pattern="[A-Za-z0-9_.\-]{3,32}">
+    <label for="authPass">Contraseña</label>
+    <input id="authPass" name="password" type="password" autocomplete="current-password" required minlength="8" maxlength="200">
+    <p class="auth-hint" id="authHint" hidden>Entre 3 y 32 caracteres para el usuario; al menos 8 para la contraseña. No hay recuperación por correo: guárdala bien.</p>
+    <p class="auth-err" id="authErr" role="alert"></p>
+    <div class="acts">
+      <button class="mini watchbig" id="authSubmit" type="submit">Entrar</button>
+      <button class="mini" id="authCancel" type="button">Cancelar</button>
+    </div>
+    <button class="linkbtn" id="authSwitch" type="button">Crear una cuenta nueva</button>
+  </form>
+</dialog>
 <script>
 const BLOCKS = {
   I:{name:"UCM · Saga del Infinito", intro:"23 películas con un arco cerrado que culmina en Endgame. La fidelidad media ronda el 45 %, pero el tono de los personajes está muy bien capturado."},
@@ -619,7 +651,6 @@ function fandom(d){return "https://marvel.fandom.com/wiki/Special:Search?scope=i
 
 // --- Progreso del usuario ---
 const watched=new Set();
-let dbDoc=null;
 function loadLocal(){
   try{const raw=localStorage.getItem("marvel.watched");if(raw)JSON.parse(raw).forEach(k=>watched.add(k));
     const c=localStorage.getItem("marvel.country");if(c)state.country=c;}catch(e){}
@@ -627,9 +658,125 @@ function loadLocal(){
 function saveLocal(){
   try{localStorage.setItem("marvel.watched",JSON.stringify([...watched]));localStorage.setItem("marvel.country",state.country);}catch(e){}
 }
-async function saveRemote(){
-  if(!dbDoc)return;
-  try{await dbDoc.set({watched:[...watched],country:state.country,updated:Date.now()});}catch(e){}
+// --- Cuenta y sincronización (Cloudflare Pages Functions + D1) ---
+const SESSION_KEY="marvel.session";
+const acct={token:null,username:null,status:"idle",lastSync:0,remoteAt:0,timer:null,dirty:false};
+try{const s=JSON.parse(localStorage.getItem(SESSION_KEY)||"null");if(s&&s.token){acct.token=s.token;acct.username=s.username;}}catch(e){}
+function saveSession(){try{acct.token?localStorage.setItem(SESSION_KEY,JSON.stringify({token:acct.token,username:acct.username})):localStorage.removeItem(SESSION_KEY);}catch(e){}}
+async function api(method,path,body){
+  const headers={};
+  if(body!==undefined)headers["content-type"]="application/json";
+  if(acct.token)headers["authorization"]="Bearer "+acct.token;
+  let res;
+  try{res=await fetch("/api"+path,{method,headers,body:body!==undefined?JSON.stringify(body):undefined});}
+  catch(e){throw {code:"network",message:"Sin conexión con el servidor."};}
+  let data={};try{data=await res.json();}catch(e){}
+  if(!res.ok){
+    if(res.status===401&&acct.token&&path!=="/login"){endSession(false);renderPanel();}
+    throw {code:data.error||"http_"+res.status,message:data.message||"Error "+res.status};
+  }
+  return data;
+}
+function setStatus(s){acct.status=s;const n=document.getElementById("syncState");if(n)n.textContent=statusText();}
+function statusText(){
+  if(acct.status==="syncing")return "Guardando…";
+  if(acct.status==="error")return "Sin conexión: se guardará al volver";
+  if(acct.lastSync){const t=new Date(acct.lastSync);return "Guardado "+String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0");}
+  return "";
+}
+async function pushProgress(){
+  if(!acct.token)return;
+  clearTimeout(acct.timer);acct.timer=null;
+  setStatus("syncing");
+  try{const r=await api("PUT","/progress",{watched:[...watched],country:state.country});acct.dirty=false;acct.remoteAt=r.updated_at;acct.lastSync=Date.now();setStatus("ok");}
+  catch(e){if(acct.token)setStatus("error");}
+}
+function saveRemote(){
+  if(!acct.token)return;
+  acct.dirty=true;clearTimeout(acct.timer);acct.timer=setTimeout(pushProgress,800);
+}
+function applyRemote(r){
+  watched.clear();(r.watched||[]).forEach(k=>watched.add(k));
+  if(r.country){state.country=r.country;const cs=document.getElementById("country");if(cs)cs.value=r.country;}
+  saveLocal();render();renderPanel();
+}
+// Al iniciar sesión: une lo marcado en este navegador con lo de la cuenta.
+async function mergeOnLogin(){
+  setStatus("syncing");
+  const r=await api("GET","/progress");
+  const before=r.watched.length;
+  const merged=new Set(r.watched);watched.forEach(k=>merged.add(k));
+  applyRemote({watched:[...merged],country:r.country||state.country});
+  acct.remoteAt=r.updated_at;
+  if(merged.size!==before||!r.country)await pushProgress();else{acct.lastSync=Date.now();setStatus("ok");}
+}
+// Al volver a la pestaña: trae lo marcado desde otro dispositivo.
+async function refreshFromServer(){
+  if(!acct.token)return;
+  if(acct.dirty){await pushProgress();return;}
+  try{const r=await api("GET","/progress");if(r.updated_at>acct.remoteAt){acct.remoteAt=r.updated_at;applyRemote(r);}acct.lastSync=Date.now();setStatus("ok");}
+  catch(e){if(acct.token)setStatus("error");}
+}
+function endSession(callServer){
+  if(callServer&&acct.token){fetch("/api/logout",{method:"POST",headers:{authorization:"Bearer "+acct.token}}).catch(()=>{});}
+  acct.token=null;acct.username=null;acct.lastSync=0;acct.remoteAt=0;acct.dirty=false;clearTimeout(acct.timer);
+  saveSession();
+  // En un equipo compartido, lo marcado no debe quedar a la vista del siguiente.
+  watched.clear();saveLocal();render();
+}
+function openAuth(mode){
+  const dlg=document.getElementById("authDlg");
+  const f=document.getElementById("authForm");
+  f.dataset.auth=mode;f.reset();
+  document.getElementById("authTitle").textContent=mode==="register"?"Crear cuenta":"Iniciar sesión";
+  document.getElementById("authSubmit").textContent=mode==="register"?"Crear cuenta":"Entrar";
+  document.getElementById("authSwitch").textContent=mode==="register"?"Ya tengo cuenta":"Crear una cuenta nueva";
+  document.getElementById("authPass").autocomplete=mode==="register"?"new-password":"current-password";
+  document.getElementById("authHint").hidden=mode!=="register";
+  document.getElementById("authErr").textContent="";
+  if(typeof dlg.showModal==="function")dlg.showModal();else dlg.setAttribute("open","");
+  document.getElementById("authUser").focus();
+}
+function closeAuth(){const dlg=document.getElementById("authDlg");if(typeof dlg.close==="function")dlg.close();else dlg.removeAttribute("open");}
+async function submitAuth(ev){
+  ev.preventDefault();
+  const f=ev.target;const mode=f.dataset.auth;
+  const username=document.getElementById("authUser").value.trim();
+  const password=document.getElementById("authPass").value;
+  const errEl=document.getElementById("authErr");const btn=document.getElementById("authSubmit");
+  errEl.textContent="";btn.disabled=true;
+  try{
+    const r=await api("POST",mode==="register"?"/register":"/login",{username,password});
+    acct.token=r.token;acct.username=r.username;saveSession();
+    closeAuth();renderPanel();
+    await mergeOnLogin();renderPanel();
+  }catch(e){errEl.textContent=e.message||"No se ha podido completar.";}
+  finally{btn.disabled=false;}
+}
+async function deleteAccount(){
+  const pw=prompt("Esto borra tu cuenta y todo lo marcado. Escribe tu contraseña para confirmarlo:");
+  if(!pw)return;
+  try{await api("DELETE","/account",{password:pw});endSession(false);renderPanel();alert("Cuenta borrada.");}
+  catch(e){alert(e.message||"No se ha podido borrar la cuenta.");}
+}
+function renderAccount(p){
+  const box=el("div","acct");
+  if(acct.token){
+    const who=el("p","acct-line");
+    who.append(document.createTextNode("Sesión iniciada como "),el("strong",null,acct.username),document.createTextNode(". "));
+    const st=el("span","acct-state",statusText());st.id="syncState";st.setAttribute("aria-live","polite");who.append(st);
+    const acts=el("div","acts");
+    const out=el("button","mini","Cerrar sesión");out.type="button";out.addEventListener("click",()=>{endSession(true);renderPanel();});
+    const del=el("button","mini quiet","Borrar cuenta");del.type="button";del.addEventListener("click",deleteAccount);
+    acts.append(out,del);box.append(who,acts);
+  }else{
+    box.append(el("p","acct-line","Ahora mismo lo que marcas se queda en este navegador. Con una cuenta lo tienes en el móvil, el portátil o donde entres."));
+    const acts=el("div","acts");
+    const reg=el("button","mini watchbig","Crear cuenta");reg.type="button";reg.addEventListener("click",()=>openAuth("register"));
+    const log=el("button","mini","Iniciar sesión");log.type="button";log.addEventListener("click",()=>openAuth("login"));
+    acts.append(reg,log);box.append(acts);
+  }
+  p.append(box);
 }
 function toggleWatched(k){
   watched.has(k)?watched.delete(k):watched.add(k);
@@ -682,14 +829,18 @@ function renderPanel(){
     box.append(el("div","ttl","Lo tienes todo visto. Solo queda esperar a Doomsday."));
   }
   p.append(box);
-  const s=el("p","sync","Tu progreso se guarda en este navegador, sin cuentas ni registro.");
-  p.append(s);
+  renderAccount(p);
 }
 
 async function initProgress(){
-  // Versión Cloudflare: el progreso vive en el navegador (localStorage).
-  // Para sincronizar entre dispositivos habría que añadir un Worker + D1/KV.
-  return;
+  document.getElementById("authForm").addEventListener("submit",submitAuth);
+  document.getElementById("authCancel").addEventListener("click",closeAuth);
+  document.getElementById("authSwitch").addEventListener("click",()=>openAuth(document.getElementById("authForm").dataset.auth==="register"?"login":"register"));
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refreshFromServer();else if(acct.dirty)pushProgress();});
+  window.addEventListener("pagehide",()=>{if(acct.dirty&&acct.token){fetch("/api/progress",{method:"PUT",keepalive:true,headers:{"content-type":"application/json",authorization:"Bearer "+acct.token},body:JSON.stringify({watched:[...watched],country:state.country})}).catch(()=>{});}});
+  if(acct.token){
+    try{await mergeOnLogin();renderPanel();}catch(e){if(acct.token)setStatus("error");}
+  }
 }
 
 let comments=null;
