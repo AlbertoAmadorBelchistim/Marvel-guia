@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -89,6 +89,7 @@ section.block .intro{color:var(--muted);max-width:64ch;margin:0 0 16px}
 .v3{background:var(--cyan);color:#fff}
 .v2{background:var(--yellow);color:#17181C}
 .v1{background:transparent;border-color:var(--grey);color:var(--muted)}
+.v0{background:transparent;border:2px dashed var(--magenta);color:var(--magenta)}
 .caret{width:10px;height:10px;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(45deg);transition:transform .15s}
 .row.open .caret{transform:rotate(225deg)}
 .detail{display:none;padding:2px 2px 18px;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 26px}
@@ -139,6 +140,12 @@ dialog.auth .acts{margin-top:14px}
 .linkbtn{background:none;border:0;padding:0;margin-top:12px;color:var(--ink);text-decoration:underline;font-size:.85rem;cursor:pointer}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:50;max-width:min(92vw,520px);background:var(--ink);color:var(--paper);padding:12px 16px;border-radius:4px;font-size:.92rem;box-shadow:0 6px 24px rgba(0,0,0,.25)}
 .sync{font-size:.78rem;color:var(--muted);margin-top:8px}
+.panel .pmodes{margin:2px 0 6px;max-width:100%}
+.panel .pmodes button{padding:7px 11px;font-size:.86rem}
+.pdesc{color:var(--muted);font-size:.88rem;margin:4px 0 0}
+.pother{color:var(--muted);font-size:.8rem;margin:0}
+.later{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+@media (max-width:640px){.panel .pmodes{display:flex}.panel .pmodes button{flex:1;padding:7px 6px;font-size:.8rem;line-height:1.2}}
 .need{font-weight:600}
 .need.n3{color:var(--magenta)}
 .need.n2{color:var(--cyan)}
@@ -151,6 +158,12 @@ dialog.auth .acts{margin-top:14px}
 .route ol{margin:0;padding-left:1.6em}
 .route li{padding:2px 0}
 .route p{color:var(--muted);font-size:.92rem;margin:10px 0 0}
+.route.wide{grid-column:1/-1}
+.route.wide ol{columns:2 300px;column-gap:40px}
+.route.wide li{break-inside:avoid}
+.route .ln{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.route li.opt .ln{opacity:.5}
+@media (max-width:640px){.toggle button{padding:8px 10px;font-size:.86rem}}
 .criteria{border-left:4px solid var(--yellow);padding:4px 0 4px 16px;margin:26px 0 0;max-width:70ch;color:var(--muted);font-size:.93rem}
 .criteria p{margin:0 0 6px}
 footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);font-size:.85rem}
@@ -213,7 +226,6 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
   <div class="wrap">
     <div class="bar-line">
       <input type="search" id="q" placeholder="Buscar" aria-label="Buscar título, personaje o arco">
-      <select id="country" aria-label="País para la disponibilidad"></select>
       <select id="sort" aria-label="Ordenar">
         <option value="release">Estreno</option>
         <option value="fid-desc">Más fieles</option>
@@ -229,6 +241,7 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
       <div class="line" id="doomChips" role="group" aria-label="Filtrar por preparación para Doomsday"></div>
     <div class="line" id="needChips" role="group" aria-label="Filtrar por necesidad para la trama"></div>
       <div class="line" id="blockChips" role="group" aria-label="Filtrar por bloque"></div>
+      <div class="line"><label for="country" style="font-size:.85rem;color:var(--muted)">País para «Dónde verla»</label><select id="country"></select></div>
       <div class="line"><button class="clear" id="clearF" type="button">Quitar filtros</button></div>
     </div>
   </div>
@@ -242,6 +255,7 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
   <div class="toggle" role="group" aria-label="Tipo de orden">
     <button type="button" data-mode="release" aria-pressed="true">Por estreno</button>
     <button type="button" data-mode="chrono" aria-pressed="false">Cronológico</button>
+    <button type="button" data-mode="doom" aria-pressed="false">Hasta Doomsday</button>
   </div>
   <p class="modenote" id="modenote"></p>
   <div class="routes" id="routes"></div>
@@ -249,7 +263,7 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
     <p><strong>Cómo leer la fidelidad.</strong> 70 % o más es una adaptación casi directa; entre 40 y 60 toma la estructura y cambia mucho; por debajo de 30 solo usa el título, el villano o la premisa.</p>
     <p><strong>Veredicto y trama son cosas distintas.</strong> El veredicto mide la calidad; la necesidad para la trama mide si omitirla deja huecos en su ruta. Thor: El mundo oscuro es opcional como película pero clave para entender Endgame.</p>
     <p><strong>Fidelidad no es calidad.</strong> Logan o Civil War se alejan del cómic y son mejores que versiones mucho más fieles.</p>
-    <p><strong>Alcance.</strong> Estrenos hasta mediados de 2026. Spider-Man: Brand New Day (julio de 2026) queda fuera.</p>
+    <p><strong>Alcance.</strong> Todo lo estrenado o previsto hasta Vengadores: Doomsday (18 de diciembre de 2026). VisionQuest y Doomsday aparecen como «por estrenar», sin fidelidad ni veredicto. La T2 de Tu amigo y vecino Spider-Man se ha retrasado a enero de 2027 y queda fuera.</p>
   </div>
 </section>
 
@@ -265,7 +279,7 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
   <div class="metro" id="metro" role="list"></div>
 </section>
 
-<footer><div class="wrap">Guía personal, sin afiliación con Marvel ni Disney. Actualizada en septiembre de 2026.</div></footer>
+<footer><div class="wrap">Guía personal, sin afiliación con Marvel ni Disney. Actualizada en octubre de 2026.</div></footer>
 
 
 <dialog id="authDlg" class="auth" aria-labelledby="authTitle">
@@ -294,7 +308,7 @@ const BLOCKS = {
   A:{name:"Animación", intro:"Con diferencia, lo más fiel a los cómics: la serie de los 90 y X-Men '97 adaptan arcos casi viñeta a viñeta."},
   O:{name:"Otras productoras", intro:"Aquí solo destaca Blade (1998), que demostró que Marvel podía funcionar en cine antes que X-Men."}
 };
-const VERDICT = {4:"Imprescindible",3:"Recomendable",2:"Opcional",1:"Saltable"};
+const VERDICT = {4:"Imprescindible",3:"Recomendable",2:"Opcional",1:"Saltable",0:"Por estrenar"};
 // [bloque, título, año, formato, arco base, %, qué respeta, qué cambia, veredicto 1-4, por qué]
 const DATA = [
 ["I","Iron Man","2008","Película","Origen en Tales of Suspense #39 (1963); guiños a Extremis (Ellis, 2005)",60,"Cautiverio, primera armadura, personalidad de Stark, Pepper y Rhodey","Afganistán en vez de Vietnam; Obadiah Stane como villano principal; Stark revela su identidad",4,"Funda el tono y el universo compartido"],
@@ -345,11 +359,15 @@ const DATA = [
 ["M","Deadpool y Lobezno","2024","Película","Mezcla libre de multiverso",30,"Humor de Deadpool, traje amarillo de Lobezno","Todo el argumento es original; Vacío como villana",3,"Despedida de los X-Men de Fox"],
 ["M","Agatha, ¿quién si no?","2024","Serie","Agatha Harkness + Billy Kaplan (Young Avengers)",30,"Billy como Wiccan, Agatha manipuladora","Camino de las Brujas inventado",2,"Musical divertido; siembra a Wiccan"],
 ["M","Capitán América: Un nuevo mundo","2025","Película","Hulk Rojo (Loeb, 2008) + Líder",35,"Ross se convierte en Hulk Rojo, Sam como Capitán","Samuel Sterns muy desaprovechado",2,"Plana, pero necesaria para Sam"],
-["M","Daredevil: Born Again T1-T2","2025-2026","Serie","Fisk alcalde (Zdarsky, 2019) + Bullseye",35,"Fisk alcalde, Matt abogado, Bullseye","De Born Again (Miller) solo tiene el título",3,"Continúa la Daredevil de Netflix con buen nivel"],
+["M","Daredevil: Born Again T1-T2","2025-2026","Serie","Fisk alcalde (Zdarsky, 2019) + Bullseye; traje negro de Shadowland (2010) en la T2",35,"Fisk alcalde, Matt abogado, Bullseye; en la T2 vuelven Jessica Jones y Luke Cage","De Born Again (Miller) solo tiene el título",3,"La T1 es irregular; la T2 mejora mucho: Matt revela su identidad y Fisk cae"],
 ["M","Thunderbolts*","2025","Película","Thunderbolts (Busiek, 1997) + Sentry (Jenkins, 2000)",35,"Equipo de villanos reformados, Sentry y Vacío","Equipo formado por secundarios del UCM, no el original",3,"La mejor sorpresa reciente; tono muy humano"],
 ["M","Ironheart","2025","Serie","Riri Williams (Bendis, 2016) + Hood",40,"Riri genio con armadura, Hood","Mezcla tecnología con magia; Mefisto",2,"Irregular; siembra a Mefisto"],
 ["M","Los 4 Fantásticos: Primeros pasos","2025","Película","La trilogía de Galactus (Fantastic Four #48-50, 1966)",55,"Galactus, Silver Surfer, familia, Franklin","Estética retrofuturista en otra Tierra; Silver Surfer es Shalla-Bal",3,"La mejor versión de los 4F en cine"],
-["M","Wonder Man","2026","Serie","Simon Williams (Avengers #9, 1964)",30,"Simon como actor","Enfoque metanarrativo sobre Hollywood",2,"Valoración provisional: la conozco menos"],
+["M","Wonder Man","2026","Serie","Simon Williams (Avengers #9, 1964)",30,"Simon como actor; Trevor Slattery (Kingsley) como compañero","Enfoque metanarrativo sobre Hollywood; la «cláusula Doorman» prohíbe a los superhumanos trabajar en el cine",3,"Comedia pequeña y muy bien recibida (91 % en Rotten Tomatoes); cierra el arco de Trevor Slattery"],
+["M","The Punisher: One Last Kill","2026","Especial","Ma Gnucci (Welcome Back, Frank; Ennis, 2000)",45,"Frank intentando dejarlo; Ma Gnucci pone precio a su cabeza","Formato de 45 minutos que sirve de puente hacia Spider-Man",3,"Valoración provisional: Bernthal en estado puro y muy corto"],
+["M","Spider-Man: Brand New Day","2026","Película","Brand New Day (Slott y otros, 2008) + The Other (2005)",30,"Peter empieza de cero y en el anonimato; lanzarredes orgánicos; Escorpión, Tombstone, Boomerang","Sin los villanos del cómic (Míster Negativo, Menace); Punisher, Hulk y Yelena como aliados; una joven mutante psiónica (Sadie Sink)",4,"La Spider-Man más taquillera y de las mejor recibidas; valoración basada en la crítica"],
+["M","VisionQuest","2026","Serie","Vision Quest (West Coast Avengers #42-45, Byrne, 1989) + Vision (Tom King, 2015)",null,"Visión blanco busca su identidad; Ultrón (Spader), Tommy y Jocasta","Por ver: se estrena el 14 de octubre de 2026",0,"Cierra la trilogía de WandaVision"],
+["M","Vengadores: Doomsday","2026","Película","Doctor Doom + Secret Wars (Shooter, 1984; Hickman, 2015)",null,"Doom (Downey Jr.) como gran villano; 4 Fantásticos y X-Men de Fox en el reparto","Por ver: se estrena el 18 de diciembre de 2026 (el 17 en Latinoamérica)",0,"Primera parte del final de la Saga del Multiverso"],
 
 ["F","X-Men","2000","Película","Uncanny X-Men clásico (Lee y Kirby, 1963; Claremont)",40,"Xavier contra Magneto, mutantes como minoría perseguida","Pícara adolescente y perdida; Lobezno protagonista; uniformes de cuero negro",3,"Inauguró el cine moderno de superhéroes"],
 ["F","X-Men 2","2003","Película","God Loves, Man Kills (Claremont, 1982)",50,"Stryker, Cerebro manipulado, alianza con Magneto","Stryker es militar, no predicador; se suma el pasado de Lobezno",4,"La mejor de la trilogía original"],
@@ -382,6 +400,7 @@ const DATA = [
 ["S","Madame Web","2024","Película","Madame Web + Spider-Women",10,"Nombres de los personajes","Todo lo demás",1,"De las peores del cine de superhéroes"],
 ["S","Venom: El último baile","2024","Película","Knull (Cates, 2018), de forma mínima",20,"Knull como creador de los simbiontes","Knull solo aparece como amenaza futura",1,"Cierre flojo"],
 ["S","Kraven el cazador","2024","Película","Kraven (Amazing Spider-Man #15, 1964)",25,"Kraven cazador","Kraven como justiciero; sin La última cacería",1,"Olvidable"],
+["S","Spider-Noir","2026","Serie · Prime Video","Spider-Man Noir (Hine y Sapolsky, 2009)",45,"Nueva York de los años 30, tono pulp y detectivesco","El protagonista es Ben Reilly, no Peter Parker; Nicolas Cage veterano y desencantado",3,"Muy bien recibida (92 % en Rotten Tomatoes), pero cancelada tras una temporada"],
 
 ["T","Agentes de S.H.I.E.L.D.","2013-2020","Serie · ABC","Mezcla libre de SHIELD, Inhumanos y Hydra",20,"Nick Fury como sombra, Quake, Ghost Rider","Protagonistas nuevos creados para la serie",2,"Mejora mucho desde la T2; 136 episodios"],
 ["T","Agente Carter","2015-2016","Serie · ABC","Peggy Carter",40,"Peggy, Jarvis, SSR","Jarvis humano, no mayordomo de Stark",2,"Corta y agradable"],
@@ -404,7 +423,7 @@ const DATA = [
 ["A","Los Vengadores: Los héroes más poderosos del planeta","2010-2012","Serie","Avengers clásico, Kang, Invasión secreta, Ultrón",65,"Arcos clásicos adaptados con respeto","Formato de episodios de 22 minutos",3,"Mejor adaptación de Invasión secreta que la serie de imagen real"],
 ["A","What If...? T1-T3","2021-2024","Serie · UCM","What If? (1977)",30,"Formato de antología con el Vigilante","Variantes del UCM, no del cómic",2,"Algunos episodios brillantes; la mayoría flojos"],
 ["A","Yo soy Groot","2022-2023","Cortos · UCM","Original",10,"Baby Groot","Todo original",2,"Cortos de un par de minutos"],
-["A","X-Men '97","2024","Serie","Operación: Tolerancia Cero (1997), E is for Extinction (Morrison, 2001), Lifedeath (Claremont, 1983), Fall of the Mutants (1988)",65,"Masacre de Génosha, Bastion, Tormenta sin poderes, Madelyne Pryor","Comprime años de cómics en diez episodios",4,"Lo más fiel a los cómics X que existe"],
+["A","X-Men '97 T1-T2","2024-2026","Serie","Operación: Tolerancia Cero (1997), E is for Extinction (Morrison, 2001), Lifedeath (Claremont, 1983), Fall of the Mutants (1988); T2: Apocalipsis",65,"Masacre de Génosha, Bastion, Tormenta sin poderes, Madelyne Pryor; en la T2, Apocalipsis en varias épocas","Comprime años de cómics; la T2 dispersa al equipo por el tiempo, del antiguo Egipto al futuro",4,"Lo más fiel a los cómics X que existe; la T2 está a la altura (100 % en Rotten Tomatoes)"],
 ["A","Tu amigo y vecino Spider-Man","2025","Serie · UCM alternativo","Etapa de Lee y Ditko reinventada",35,"Peter adolescente, secundarios clásicos","Norman Osborn como mentor; Nico Minoru y Lonnie Lincoln en el reparto",2,"Valoración provisional; animación vistosa"],
 ["A","Marvel Zombies","2025","Miniserie · UCM","Marvel Zombies (Kirkman, 2005)",35,"Héroes zombificados","Reparto de la Fase 4",2,"Solo si te gusta el concepto"],
 ["A","Eyes of Wakanda","2025","Miniserie · UCM","Original sobre la historia de Wakanda",20,"Mitología wakandiana","Todo original",2,"Curiosidad corta"],
@@ -476,7 +495,12 @@ const NEED={
 "Thunderbolts*|2025":[3,"Forma a los nuevos Vengadores"],
 "Ironheart|2025":[1,"Deja a Mefisto y Hood como hilos abiertos"],
 "Los 4 Fantásticos: Primeros pasos|2025":[3,"Presenta a los 4F antes de Doomsday"],
-"Wonder Man|2026":[1,"Sin consecuencias conocidas por ahora"],
+"Wonder Man|2026":[1,"Cierra el arco de Trevor Slattery (Iron Man 3, Shang-Chi); sin consecuencias conocidas"],
+"The Punisher: One Last Kill|2026":[2,"Puente entre Born Again T2 y Brand New Day"],
+"Spider-Man: Brand New Day|2026":[3,"Peter cuatro años después de No Way Home; última película antes de Doomsday"],
+"VisionQuest|2026":[2,"Previsiblemente: cierra la trilogía de WandaVision y trae de vuelta a Ultrón"],
+"Vengadores: Doomsday|2026":[3,"Arranca el final de la Saga del Multiverso"],
+"Spider-Noir|2026":[0,"Universo propio; se entiende sola"],
 "X-Men|2000":[3,"Base de toda la ruta X-Men"],
 "X-Men 2|2003":[3,"Stryker, Jean y la base de la trilogía"],
 "X-Men: La decisión final|2006":[2,"Días del futuro pasado reescribe sus hechos, pero parte de ellos"],
@@ -527,7 +551,7 @@ const NEED={
 "Los Vengadores: Los héroes más poderosos del planeta|2010-2012":[0,"Se entiende sola"],
 "What If...? T1-T3|2021-2024":[1,"Algunas variantes reaparecen, sin peso real"],
 "Yo soy Groot|2022-2023":[0,"Cortos sueltos"],
-"X-Men '97|2024":[3,"Continúa la serie de los 90"],
+"X-Men '97 T1-T2|2024-2026":[3,"Continúa la serie de los 90"],
 "Tu amigo y vecino Spider-Man|2025":[0,"Universo aparte"],
 "Marvel Zombies|2025":[0,"Continúa un episodio de What If, pero se entiende sola"],
 "Eyes of Wakanda|2025":[0,"Se entiende sola"],
@@ -547,23 +571,29 @@ const ROUTES={
 release:{
   note:"Orden en que se estrenaron. Es el recomendado para un primer visionado del UCM: respeta las sorpresas, los poscréditos y cómo se fue construyendo la historia.",
   routes:[
-   {t:"Ruta narrativa del UCM (37)",items:["Iron Man","Capitán América: El primer vengador","Thor","Los Vengadores","Iron Man 3","Thor: El mundo oscuro","Capitán América: El soldado de invierno","Guardianes de la Galaxia","Vengadores: La era de Ultrón","Ant-Man","Capitán América: Civil War","Doctor Strange","Guardianes de la Galaxia Vol. 2","Spider-Man: Homecoming","Thor: Ragnarok","Black Panther","Vengadores: Infinity War","Ant-Man y la Avispa","Capitana Marvel","Vengadores: Endgame","Spider-Man: Lejos de casa","WandaVision","Falcon y el Soldado de Invierno","Loki T1","Viuda Negra","Shang-Chi","Ojo de Halcón","Spider-Man: No Way Home|después de Raimi y Webb","Doctor Strange en el multiverso de la locura","Ms. Marvel","Black Panther: Wakanda Forever","Guardianes de la Galaxia Vol. 3","Loki T2","Deadpool y Lobezno|después de la ruta X-Men","Capitán América: Un nuevo mundo","Thunderbolts*","Los 4 Fantásticos: Primeros pasos"],
+   {t:"Ruta narrativa del UCM (40)",items:["Iron Man","Capitán América: El primer vengador","Thor","Los Vengadores","Iron Man 3","Thor: El mundo oscuro","Capitán América: El soldado de invierno","Guardianes de la Galaxia","Vengadores: La era de Ultrón","Ant-Man","Capitán América: Civil War","Doctor Strange","Guardianes de la Galaxia Vol. 2","Spider-Man: Homecoming","Thor: Ragnarok","Black Panther","Vengadores: Infinity War","Ant-Man y la Avispa","Capitana Marvel","Vengadores: Endgame","Spider-Man: Lejos de casa","WandaVision","Falcon y el Soldado de Invierno","Loki T1","Viuda Negra","Shang-Chi","Ojo de Halcón","Spider-Man: No Way Home|después de Raimi y Webb","Doctor Strange en el multiverso de la locura","Ms. Marvel","Black Panther: Wakanda Forever","Guardianes de la Galaxia Vol. 3","Loki T2","Deadpool y Lobezno|después de la ruta X-Men","Capitán América: Un nuevo mundo","Thunderbolts*","Los 4 Fantásticos: Primeros pasos","Spider-Man: Brand New Day","VisionQuest|14 de octubre de 2026","Vengadores: Doomsday|18 de diciembre de 2026"],
     p:"Incluye todo lo marcado como clave para la trama, aunque la película sea floja. Lo de contexto útil se puede intercalar en su año."},
-   {t:"Ruta Netflix",items:["Daredevil T1","Jessica Jones T1","Luke Cage T1","Daredevil T2","The Defenders","The Punisher T1","Daredevil T3","Daredevil: Born Again"]},
+   {t:"Ruta Netflix",items:["Daredevil T1","Jessica Jones T1","Luke Cage T1","Daredevil T2","The Defenders","The Punisher T1","Daredevil T3","Daredevil: Born Again T1-T2","The Punisher: One Last Kill|puente hacia Brand New Day"]},
    {t:"Ruta X-Men (Fox)",items:["X-Men","X-Men 2","X-Men: Primera generación","~Lobezno inmortal|opcional","X-Men: Días del futuro pasado","Deadpool","Logan","Deadpool 2","Deadpool y Lobezno"],
-    p:"En animación, X-Men: La serie animada antes de X-Men '97, que es su continuación directa. Según lo anunciado, varios actores de estas películas vuelven en Vengadores: Doomsday (diciembre de 2026)."},
-   {t:"Ruta Spider-Man",items:["Spider-Man y Spider-Man 2 (Raimi)","The Amazing Spider-Man 1 y 2","Un nuevo universo y Cruzando el multiverso|independientes","Spider-Man del UCM|No Way Home solo después de Raimi y Webb"]}
+    p:"En animación, X-Men: La serie animada antes de X-Men '97 (T1 y T2), que es su continuación directa. Según lo anunciado, varios actores de estas películas vuelven en Vengadores: Doomsday (diciembre de 2026)."},
+   {t:"Ruta Spider-Man",items:["Spider-Man y Spider-Man 2 (Raimi)","The Amazing Spider-Man 1 y 2","Un nuevo universo y Cruzando el multiverso|independientes","Spider-Man del UCM|No Way Home solo después de Raimi y Webb; luego Brand New Day","~Spider-Noir|serie aparte, otro universo"]}
+  ]},
+doom:{
+  note:"Todo lo necesario de todas las líneas (UCM, X-Men de Fox, Spider-Man de Raimi y Webb, Daredevil de Netflix y los 4 Fantásticos) en una sola lista, en el orden de los hechos y con el año interno de cada obra. El reloj es el del UCM; las otras Tierras se colocan según su propio año y donde se enganchan. Lo atenuado es opcional.",
+  routes:[
+   {t:"Todo hasta Doomsday, en orden cronológico (52 + 6 opcionales)",wide:true,items:["U:Capitán América: El primer vengador|1942-1945", "X:X-Men: Primera generación|1962; no necesita nada previo", "U:Capitana Marvel|1995; su poscréditos adelanta Endgame", "X:X-Men|años 2000", "R:Spider-Man|2002, Raimi", "X:X-Men 2|2003", "R:Spider-Man 2|2004", "~X:X-Men: La decisión final|2006; Días del futuro pasado parte de ella", "~R:Spider-Man 3|2007; Sandman vuelve en No Way Home", "U:Iron Man|2008", "U:Thor|2010", "W:The Amazing Spider-Man|2012", "U:Los Vengadores|2012", "U:Iron Man 3|Navidad de 2012", "~X:Lobezno inmortal|hacia 2013; su escena final lleva a Días del futuro pasado", "U:Thor: El mundo oscuro|2013", "W:The Amazing Spider-Man 2|2014", "U:Capitán América: El soldado de invierno|2014", "U:Guardianes de la Galaxia|2014", "U:Guardianes de la Galaxia Vol. 2|2014, meses después", "X:X-Men: Días del futuro pasado|2023 y 1973; une los dos repartos y reescribe la línea de Fox", "U:Vengadores: La era de Ultrón|2015", "U:Ant-Man|2015", "N:Daredevil T1-T3|2015-2018; Jessica Jones, Luke Cage y The Defenders son opcionales", "U:Capitán América: Civil War|2016", "U:Viuda Negra|2016, justo tras Civil War", "U:Black Panther|2016", "U:Spider-Man: Homecoming|2016", "X:Deadpool|2016", "U:Doctor Strange|2016-2017", "N:The Punisher T1|2017; Frank vuelve en Born Again y Brand New Day", "U:Thor: Ragnarok|2017", "X:Deadpool 2|2018", "U:Ant-Man y la Avispa|2018", "U:Vengadores: Infinity War|2018", "U:Vengadores: Endgame|2018 y 2023", "U:Loki T1 y T2|fuera del tiempo; parte de 2012", "U:WandaVision|2023", "U:Shang-Chi|2024", "U:Falcon y el Soldado de Invierno|2024", "U:Spider-Man: Lejos de casa|2024", "U:Spider-Man: No Way Home|2024; aquí se juntan Raimi, Webb y el UCM", "U:Doctor Strange en el multiverso de la locura|2024", "U:Ojo de Halcón|Navidad de 2024", "X:Logan|2029 en Tierra-10005; va aquí porque Deadpool y Lobezno arranca en su tumba", "X:Deadpool y Lobezno|2024 en Tierra-10005; cierra la línea de Fox dentro del UCM", "U:Black Panther: Wakanda Forever|2024-2025", "U:Ms. Marvel|2025", "~U:The Marvels|2025; su escena final trae a la Bestia de Fox", "U:Guardianes de la Galaxia Vol. 3|2026", "N:Daredevil: Born Again T1-T2|2026; Netflix ya dentro del UCM", "~N:The Punisher: One Last Kill|2026, justo tras Born Again T2", "U:Capitán América: Un nuevo mundo|2027", "U:Thunderbolts*|2027", "F:Los 4 Fantásticos: Primeros pasos|años 60 de Tierra-828; vale en cualquier punto antes de Doomsday", "U:Spider-Man: Brand New Day|2028, cuatro años tras No Way Home", "~U:VisionQuest|hacia 2028; se estrena el 14 de octubre", "U:Vengadores: Doomsday|2028-2029; se estrena el 18 de diciembre"],
+    p:"Dos excepciones al orden estricto: Logan (2029) va antes de Deadpool y Lobezno (2024) porque esta parte de aquella, y los 4 Fantásticos viven en otra Tierra, así que van al final, antes de Brand New Day y Doomsday. Ojo con los poscréditos de Capitana Marvel si es tu primer visionado. Colores: rojo UCM · amarillo X-Men de Fox · azul Spider-Man de Raimi · turquesa Spider-Man de Webb · marrón Netflix y Daredevil · verde 4 Fantásticos. Si vas justo de tiempo, la rama marrón es la única que Doomsday no necesita."}
   ]},
 chrono:{
   note:"Orden de los hechos dentro de la historia, con el año interno de cada obra. Se sigue sin problemas, pero algunas sorpresas y poscréditos pierden fuerza: en el UCM compensa sobre todo en un segundo visionado; en X-Men funciona bien incluso la primera vez.",
   routes:[
-   {t:"Ruta narrativa del UCM (37)",items:["Capitán América: El primer vengador|1942-1945","Capitana Marvel|1995","Iron Man|2008","Thor|2011","Los Vengadores|2012","Iron Man 3|Navidad de 2012","Thor: El mundo oscuro|2013","Capitán América: El soldado de invierno|2014","Guardianes de la Galaxia|2014","Guardianes de la Galaxia Vol. 2|2014, meses después","Vengadores: La era de Ultrón|2015","Ant-Man|2015","Capitán América: Civil War|2016","Viuda Negra|2016, justo tras Civil War","Black Panther|2016","Spider-Man: Homecoming|2016","Doctor Strange|2016-2017","Thor: Ragnarok|2017","Ant-Man y la Avispa|2018","Vengadores: Infinity War|2018","Vengadores: Endgame|2018 y 2023","Loki T1 y T2|fuera del tiempo; parte de 2012","WandaVision|2023","Shang-Chi|2024","Falcon y el Soldado de Invierno|2024","Spider-Man: Lejos de casa|2024","Spider-Man: No Way Home|2024; después de Raimi y Webb","Doctor Strange en el multiverso de la locura|2024","Ojo de Halcón|Navidad de 2024","Black Panther: Wakanda Forever|2024-2025","Ms. Marvel|2025","Guardianes de la Galaxia Vol. 3|2026","Deadpool y Lobezno|2024 en otro universo; tras Loki y Logan","Capitán América: Un nuevo mundo|2027","Thunderbolts*|2027","Los 4 Fantásticos: Primeros pasos|Tierra-828, otro universo; vale en cualquier punto"],
+   {t:"Ruta narrativa del UCM (40)",items:["Capitán América: El primer vengador|1942-1945","Capitana Marvel|1995","Iron Man|2008","Thor|2011","Los Vengadores|2012","Iron Man 3|Navidad de 2012","Thor: El mundo oscuro|2013","Capitán América: El soldado de invierno|2014","Guardianes de la Galaxia|2014","Guardianes de la Galaxia Vol. 2|2014, meses después","Vengadores: La era de Ultrón|2015","Ant-Man|2015","Capitán América: Civil War|2016","Viuda Negra|2016, justo tras Civil War","Black Panther|2016","Spider-Man: Homecoming|2016","Doctor Strange|2016-2017","Thor: Ragnarok|2017","Ant-Man y la Avispa|2018","Vengadores: Infinity War|2018","Vengadores: Endgame|2018 y 2023","Loki T1 y T2|fuera del tiempo; parte de 2012","WandaVision|2023","Shang-Chi|2024","Falcon y el Soldado de Invierno|2024","Spider-Man: Lejos de casa|2024","Spider-Man: No Way Home|2024; después de Raimi y Webb","Doctor Strange en el multiverso de la locura|2024","Ojo de Halcón|Navidad de 2024","Black Panther: Wakanda Forever|2024-2025","Ms. Marvel|2025","Guardianes de la Galaxia Vol. 3|2026","Deadpool y Lobezno|2024 en otro universo; tras Loki y Logan","Capitán América: Un nuevo mundo|2027","Thunderbolts*|2027","Los 4 Fantásticos: Primeros pasos|Tierra-828, otro universo; vale en cualquier punto","Spider-Man: Brand New Day|2028, cuatro años tras No Way Home","VisionQuest|hacia 2028","Vengadores: Doomsday|14 meses tras Thunderbolts*"],
     p:"Viuda Negra y Capitana Marvel son las que más cambian de sitio. Si es tu primera vez, Capitana Marvel revela giros de Infinity War y Endgame en su poscréditos: guárdala para después si prefieres."},
-   {t:"Ruta Netflix",items:["Daredevil T1|2015","Jessica Jones T1|2015","Daredevil T2|2016","Luke Cage T1|2016","The Defenders|2017","The Punisher T1|2017","Daredevil T3|2018","Daredevil: Born Again|años después"],
+   {t:"Ruta Netflix",items:["Daredevil T1|2015","Jessica Jones T1|2015","Daredevil T2|2016","Luke Cage T1|2016","The Defenders|2017","The Punisher T1|2017","Daredevil T3|2018","Daredevil: Born Again T1-T2|años después","The Punisher: One Last Kill|justo tras Born Again T2"],
     p:"Casi idéntico al de estreno: solo Luke Cage T1 pasa detrás de Daredevil T2."},
    {t:"Ruta X-Men (Fox)",items:["X-Men: Primera generación|1962","~X-Men orígenes: Lobezno|1845-1979; opcional y floja","X-Men|«futuro no muy lejano», años 2000","X-Men 2|meses después","~X-Men: La decisión final|opcional; la siguiente la da por vista","~Lobezno inmortal|tras La decisión final; opcional","X-Men: Días del futuro pasado|2023 y 1973; reescribe la línea temporal","Deadpool|2016","Deadpool 2|2018","Logan|2029","Deadpool y Lobezno|2024; va la última porque juega con Logan"],
     p:"Aquí el cronológico sí funciona a la primera: Primera generación no necesita nada previo y cuenta el origen de Xavier, Magneto y Mística. Apocalipsis (1983) y Fénix Oscuro (1992) irían tras Días del futuro pasado, pero son saltables."},
-   {t:"Ruta Spider-Man",items:["Spider-Man, Spider-Man 2 y Spider-Man 3 (Raimi)|2002-2007","The Amazing Spider-Man 1 y 2|otro universo","Spider-Man: Homecoming|2016","Spider-Man: Lejos de casa|2024","Spider-Man: No Way Home|2024","Un nuevo universo y Cruzando el multiverso|universo propio; en cualquier momento"],
+   {t:"Ruta Spider-Man",items:["Spider-Man, Spider-Man 2 y Spider-Man 3 (Raimi)|2002-2007","The Amazing Spider-Man 1 y 2|otro universo","Spider-Man: Homecoming|2016","Spider-Man: Lejos de casa|2024","Spider-Man: No Way Home|2024","Spider-Man: Brand New Day|2028","Un nuevo universo y Cruzando el multiverso|universo propio; en cualquier momento","~Spider-Noir|años 30, universo propio"],
     p:"Cada Spider-Man vive en su propio universo, así que el orden cronológico coincide con el de estreno."}
   ]}
 };
@@ -573,11 +603,15 @@ function renderRoutes(){
   document.getElementById("modenote").textContent=cfg.note;
   const box=document.getElementById("routes");box.textContent="";
   cfg.routes.forEach(r=>{
-    const d=el("div","route");d.append(el("h3",null,r.t));
+    const d=el("div","route"+(r.wide?" wide":""));d.append(el("h3",null,r.t));
     const ol=el("ol");
     r.items.forEach(it=>{
-      const opt=it.startsWith("~");const [name,note]=(opt?it.slice(1):it).split("|");
-      const li=el("li",opt?"opt":null,name);
+      const opt=it.startsWith("~");let raw=opt?it.slice(1):it;let lane=null;
+      const mm=raw.match(/^([A-Z]):(.*)$/);if(mm){lane=mm[1];raw=mm[2];}
+      const [name,note]=raw.split("|");
+      const li=el("li",opt?"opt":null);
+      if(lane){const dt=el("span","ln");dt.style.background="var(--l"+lane+")";li.append(dt);}
+      li.append(document.createTextNode(name));
       if(note){li.append(document.createTextNode(" "),el("small",null,"· "+note));}
       ol.append(li);
     });
@@ -588,7 +622,7 @@ function renderRoutes(){
 document.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",()=>{routeMode=b.dataset.mode;try{localStorage.setItem("routeMode",routeMode);}catch(e){}renderRoutes();}));
 try{const m=localStorage.getItem("routeMode");if(m&&ROUTES[m])routeMode=m;}catch(e){}
 
-const state={q:"",sort:"release",verdicts:new Set(),blocks:new Set(),needs:new Set(),dooms:new Set(),country:"es",doomMode:false};
+const state={q:"",sort:"release",verdicts:new Set(),blocks:new Set(),needs:new Set(),dooms:new Set(),country:"es"};
 // --- Vengadores: Doomsday (18 de diciembre de 2026; 17 en Latinoamérica) ---
 const DOOM_DATE=new Date("2026-12-18T00:00:00-05:00");
 // 2 = imprescindible antes de Doomsday, 1 = recomendable
@@ -612,12 +646,13 @@ const DOOM={
 "Capitán América: Un nuevo mundo|2025":[2,"Sam Wilson como Capitán América"],
 "Thunderbolts*|2025":[2,"El equipo entero aparece en el tráiler"],
 "Los 4 Fantásticos: Primeros pasos|2025":[2,"Los 4F son piezas centrales"],
-"The Marvels|2023":[1,"La Bestia de Kelsey Grammer aparece en su escena final"]
+"The Marvels|2023":[1,"La Bestia de Kelsey Grammer aparece en su escena final"],
+"Spider-Man: Brand New Day|2026":[1,"El UCM justo antes de Doomsday: Peter, Hulk y Yelena"]
 };
 DATA.forEach(d=>{const x=DOOM[d.title+"|"+d.year];d.doom=x?x[0]:0;d.doomWhy=x?x[1]:"";});
 
 // Ruta narrativa del UCM, por título
-const ROUTE=["Iron Man|2008","Capitán América: El primer vengador|2011","Thor|2011","Los Vengadores|2012","Iron Man 3|2013","Thor: El mundo oscuro|2013","Capitán América: El soldado de invierno|2014","Guardianes de la Galaxia|2014","Vengadores: La era de Ultrón|2015","Ant-Man|2015","Capitán América: Civil War|2016","Doctor Strange|2016","Guardianes de la Galaxia Vol. 2|2017","Spider-Man: Homecoming|2017","Thor: Ragnarok|2017","Black Panther|2018","Vengadores: Infinity War|2018","Ant-Man y la Avispa|2018","Capitana Marvel|2019","Vengadores: Endgame|2019","Spider-Man: Lejos de casa|2019","WandaVision|2021","Falcon y el Soldado de Invierno|2021","Loki T1-T2|2021-2023","Viuda Negra|2021","Shang-Chi y la leyenda de los Diez Anillos|2021","Ojo de Halcón|2021","Spider-Man: No Way Home|2021","Doctor Strange en el multiverso de la locura|2022","Ms. Marvel|2022","Black Panther: Wakanda Forever|2022","Guardianes de la Galaxia Vol. 3|2023","Deadpool y Lobezno|2024","Capitán América: Un nuevo mundo|2025","Thunderbolts*|2025","Los 4 Fantásticos: Primeros pasos|2025"];
+const ROUTE=["Iron Man|2008","Capitán América: El primer vengador|2011","Thor|2011","Los Vengadores|2012","Iron Man 3|2013","Thor: El mundo oscuro|2013","Capitán América: El soldado de invierno|2014","Guardianes de la Galaxia|2014","Vengadores: La era de Ultrón|2015","Ant-Man|2015","Capitán América: Civil War|2016","Doctor Strange|2016","Guardianes de la Galaxia Vol. 2|2017","Spider-Man: Homecoming|2017","Thor: Ragnarok|2017","Black Panther|2018","Vengadores: Infinity War|2018","Ant-Man y la Avispa|2018","Capitana Marvel|2019","Vengadores: Endgame|2019","Spider-Man: Lejos de casa|2019","WandaVision|2021","Falcon y el Soldado de Invierno|2021","Loki T1-T2|2021-2023","Viuda Negra|2021","Shang-Chi y la leyenda de los Diez Anillos|2021","Ojo de Halcón|2021","Spider-Man: No Way Home|2021","Doctor Strange en el multiverso de la locura|2022","Ms. Marvel|2022","Black Panther: Wakanda Forever|2022","Guardianes de la Galaxia Vol. 3|2023","Deadpool y Lobezno|2024","Capitán América: Un nuevo mundo|2025","Thunderbolts*|2025","Los 4 Fantásticos: Primeros pasos|2025","Spider-Man: Brand New Day|2026","VisionQuest|2026","Vengadores: Doomsday|2026"];
 
 const COUNTRIES=[["es","España","es"],["mx","México","es"],["ar","Argentina","es"],["cl","Chile","es"],["co","Colombia","es"],["pe","Perú","es"],["us","Estados Unidos","en"],["uk","Reino Unido","en"],["fr","Francia","fr"],["de","Alemania","de"],["it","Italia","it"],["pt","Portugal","pt"]];
 const SEARCH_PATH={es:"buscar",en:"search",fr:"recherche",de:"Suche",it:"cerca",pt:"busca"};
@@ -789,6 +824,38 @@ function toggleWatched(k){
   });
 }
 
+// --- Rutas del panel de preparación ---
+const PANEL_MODES={
+  ucm:{label:"Ruta UCM",bar:"Ruta UCM",desc:"Las obras clave del UCM, en orden de estreno.",k:"Siguiente en la ruta UCM"},
+  doom:{label:"Imprescindibles Doomsday",bar:"Imprescindibles para Doomsday",desc:"Solo lo que Doomsday pide directamente, en orden cronológico. Al terminarlas, sigue con las recomendables.",k:"Siguiente imprescindible para Doomsday"},
+  full:{label:"Ruta completa",bar:"Ruta completa hasta Doomsday",desc:"Todas las líneas (UCM, Fox, Raimi, Webb, Netflix y 4F) en orden cronológico, sin las opcionales.",k:"Siguiente en la ruta completa"}
+};
+let panelMode="full";
+try{const pm=localStorage.getItem("marvel.panelMode");if(pm&&PANEL_MODES[pm])panelMode=pm;}catch(e){}
+const FULL_ALIAS={"Loki T1 y T2":"Loki T1-T2|2021-2023","Shang-Chi":"Shang-Chi y la leyenda de los Diez Anillos|2021","The Punisher T1":"The Punisher T1-T2|2017-2019"};
+// Ruta completa: sale de la lista «Hasta Doomsday» de abajo
+const FULL=ROUTES.doom.routes[0].items.map(it=>{
+  const opt=it.startsWith("~");let raw=opt?it.slice(1):it;raw=raw.replace(/^[A-Z]:/,"");
+  const [name,note]=raw.split("|");
+  const k=FULL_ALIAS[name]||(DATA.find(d=>d.title===name)?key(DATA.find(d=>d.title===name)):null);
+  if(!k)console.warn("ruta completa sin obra:",name);
+  return {k,opt,note:note||""};
+}).filter(x=>x.k);
+const FULL_POS={};FULL.forEach((x,i)=>{if(!(x.k in FULL_POS))FULL_POS[x.k]=i;});
+const posOf=d=>(key(d) in FULL_POS)?FULL_POS[key(d)]:999;
+function panelList(mode){
+  if(mode==="ucm")return ROUTE.map(k=>({k,why:""}));
+  if(mode==="doom"){
+    const ord=(a,b)=>posOf(a)-posOf(b)||a.start-b.start;
+    return DATA.filter(d=>d.doom===2).sort(ord).concat(DATA.filter(d=>d.doom===1).sort(ord)).map(d=>({k:key(d),why:d.doomWhy,rec:d.doom===1}));
+  }
+  return FULL.filter(x=>!x.opt).map(x=>({k:x.k,why:x.note}));
+}
+function progressOf(mode){
+  const l=panelList(mode).filter(x=>!x.rec);
+  return [l.filter(x=>watched.has(x.k)).length,l.length];
+}
+
 function renderPanel(){
   const p=document.getElementById("panel");p.textContent="";
   const days=Math.ceil((DOOM_DATE-new Date())/86400000);
@@ -796,40 +863,45 @@ function renderPanel(){
   cd.append(el("b",null,days>0?String(days):"0"),el("span",null,days>0?"días para Vengadores: Doomsday (18 de diciembre de 2026; el 17 en Latinoamérica)":"Doomsday ya está en cines"));
   p.append(el("h2",null,"Tu preparación"),cd);
 
-  const doomList=DATA.filter(d=>d.doom===2);
-  const doomDone=doomList.filter(d=>watched.has(key(d))).length;
-  const routeDone=ROUTE.filter(k=>watched.has(k)).length;
-  const bar=(label,done,total)=>{
-    const w=el("div","prog");const l=el("div","lab");
-    l.append(el("span",null,label),el("span",null,done+" de "+total));
-    const tr=el("div","track");const go=el("div","go");go.style.width=(total?Math.round(done/total*100):0)+"%";tr.append(go);
-    w.append(l,tr);p.append(w);
-  };
-  bar("Imprescindibles para Doomsday",doomDone,doomList.length);
-  bar("Ruta narrativa del UCM",routeDone,ROUTE.length);
+  const tg=el("div","toggle pmodes");tg.setAttribute("role","group");tg.setAttribute("aria-label","Ruta a seguir");
+  Object.entries(PANEL_MODES).forEach(([m,c])=>{
+    const bt=el("button",null,c.label);bt.type="button";bt.setAttribute("aria-pressed",m===panelMode);
+    bt.addEventListener("click",()=>{panelMode=m;try{localStorage.setItem("marvel.panelMode",m);}catch(e){}renderPanel();});
+    tg.append(bt);
+  });
+  p.append(tg,el("p","pdesc",PANEL_MODES[panelMode].desc));
 
-  const nextDoom=doomList.concat(DATA.filter(d=>d.doom===1)).find(d=>!watched.has(key(d)));
-  const nextRouteKey=ROUTE.find(k=>!watched.has(k));
-  const nextRoute=nextRouteKey?byKey(nextRouteKey):null;
-  const pick=state.doomMode?(nextDoom||nextRoute):(nextRoute||nextDoom);
+  const [done,total]=progressOf(panelMode);
+  const w=el("div","prog");const l=el("div","lab");
+  l.append(el("span",null,PANEL_MODES[panelMode].bar),el("span",null,done+" de "+total));
+  const tr=el("div","track");const go=el("div","go");go.style.width=(total?Math.round(done/total*100):0)+"%";tr.append(go);
+  w.append(l,tr);p.append(w);
+  const others=Object.keys(PANEL_MODES).filter(m=>m!==panelMode).map(m=>{const [d,t]=progressOf(m);return PANEL_MODES[m].label+": "+d+" de "+t;});
+  p.append(el("p","pother",others.join(" · ")));
+
+  const pending=panelList(panelMode).filter(x=>!watched.has(x.k));
   const box=el("div","next");
-  if(pick){
-    box.append(el("div","k",state.doomMode?"Siguiente para llegar a Doomsday":"Siguiente en tu ruta"));
+  if(pending.length){
+    const nx=pending[0];const pick=byKey(nx.k);
+    box.append(el("div","k",nx.rec?"Imprescindibles vistas. Siguiente recomendable para Doomsday":PANEL_MODES[panelMode].k));
     box.append(el("div","ttl",pick.title+" ("+pick.year+")"));
-    box.append(el("div","why",(state.doomMode&&pick.doomWhy)?pick.doomWhy:(pick.needWhy||pick.why)));
+    box.append(el("div","why",nx.why||pick.doomWhy||pick.needWhy||pick.why));
     const acts=el("div","acts");
-    const w=el("button","mini watchbig",watched.has(key(pick))?"Vista ✓":"Marcar como vista");w.type="button";
-    w.addEventListener("click",()=>toggleWatched(key(pick)));
+    const wb=el("button","mini watchbig","Marcar como vista");wb.type="button";
+    wb.addEventListener("click",()=>toggleWatched(key(pick)));
     const a=el("a","mini","Dónde verla");a.href=jw(pick);a.target="_blank";a.rel="noopener";
-    const b=el("a","mini","IMDb");b.href=imdb(pick);b.target="_blank";b.rel="noopener";
+    const b2=el("a","mini","IMDb");b2.href=imdb(pick);b2.target="_blank";b2.rel="noopener";
     const f=el("a","mini","El cómic");f.href=fandom(pick);f.target="_blank";f.rel="noopener";
-    const m=el("button","mini",state.doomMode?"Ver ruta completa":"Modo Doomsday");m.type="button";
-    m.addEventListener("click",()=>{state.doomMode=!state.doomMode;renderPanel();});
-    acts.append(w,a,b,f,m);box.append(acts);
+    acts.append(wb,a,b2,f);box.append(acts);
+    if(pending.length>1){
+      const later=pending.slice(1,4).map(x=>byKey(x.k).title);
+      box.append(el("p","later","Después: "+later.join(" · ")+(pending.length>4?" y "+(pending.length-4)+" más":"")));
+    }
   }else{
-    box.append(el("div","ttl","Lo tienes todo visto. Solo queda esperar a Doomsday."));
+    box.append(el("div","ttl",panelMode==="ucm"?"Ruta UCM completada.":"Lo tienes todo visto. Solo queda esperar a Doomsday."));
   }
   p.append(box);
+  p.append(el("p","sync","Marca lo que vas viendo con el ✓ de cada obra."));
   renderAccount(p);
 }
 
@@ -870,9 +942,10 @@ function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className
 
 function renderTally(){
   const t=document.getElementById("tally");
-  [4,3,2,1].forEach(v=>{
+  [4,3,2,1,0].forEach(v=>{
+    if(v===0&&!DATA.some(d=>d.v===0))return;
     const s=el("span");const b=el("b",null,String(DATA.filter(d=>d.v===v).length));
-    s.append(b,document.createTextNode(VERDICT[v].toLowerCase()+(DATA.filter(d=>d.v===v).length===1?"":"s")));
+    const n=DATA.filter(d=>d.v===v).length;const PL={4:"imprescindibles",3:"recomendables",2:"opcionales",1:"saltables",0:"por estrenar"};s.append(b,document.createTextNode(n===1?VERDICT[v].toLowerCase():PL[v]));
     t.append(s);
   });
 }
@@ -900,9 +973,9 @@ function matches(d){
 }
 function sorter(a,b){
   switch(state.sort){
-    case "fid-desc":return b.pct-a.pct||a.start-b.start;
-    case "fid-asc":return a.pct-b.pct||a.start-b.start;
-    case "verdict":return b.v-a.v||b.pct-a.pct;
+    case "fid-desc":return (b.pct??-1)-(a.pct??-1)||a.start-b.start;
+    case "fid-asc":return (a.pct??999)-(b.pct??999)||a.start-b.start;
+    case "verdict":return b.v-a.v||(b.pct??0)-(a.pct??0);
     case "need":return b.need-a.need||a.start-b.start;
     case "doom":return b.doom-a.doom||a.start-b.start;
     default:return a.start-b.start||a.i-b.i;
@@ -916,8 +989,9 @@ function row(d){
   const head=el("button","row-head");head.type="button";head.setAttribute("aria-expanded","false");
   const wt=el("span","watch");wt.textContent="✓";
   const t=el("span","t",d.title);const sm=el("small",null,d.year+" · "+d.format+" · ");const nd=el("span","need n"+d.need,"Trama: "+NEED_LABEL[d.need].toLowerCase());sm.append(nd);t.append(sm);
-  const fid=el("span","fid");const bar=el("span","bar");const fill=el("span","fill");fill.style.width=d.pct+"%";bar.append(fill);
-  fid.append(bar,el("span","n",d.pct+"%"));fid.setAttribute("aria-label","Fidelidad "+d.pct+" por ciento");
+  const fid=el("span","fid");const bar=el("span","bar");const fill=el("span","fill");fill.style.width=(d.pct||0)+"%";bar.append(fill);
+  if(d.pct==null){bar.style.visibility="hidden";fid.append(bar,el("span","n","—"));fid.setAttribute("aria-label","Fidelidad por valorar");}
+  else{fid.append(bar,el("span","n",d.pct+"%"));fid.setAttribute("aria-label","Fidelidad "+d.pct+" por ciento");}
   const v=el("span","v v"+d.v,VERDICT[d.v]);
   const caret=el("span","caret");caret.setAttribute("aria-hidden","true");
   const wb=el("button","watch");wb.type="button";wb.textContent="✓";
@@ -981,7 +1055,7 @@ function render(){
   }
   if(!shown){const e=el("p","empty","Ninguna obra coincide. Quita algún filtro o cambia la búsqueda.");main.append(e);}
   document.getElementById("count").textContent=shown+" de "+DATA.length+" obras";
-  const nf=state.verdicts.size+state.needs.size+state.blocks.size;
+  const nf=state.verdicts.size+state.needs.size+state.blocks.size+state.dooms.size;
   const fb=document.getElementById("fbtn");fb.textContent=nf?"Filtros ("+nf+")":"Filtros";fb.classList.toggle("active",nf>0);
 }
 
@@ -991,7 +1065,7 @@ COUNTRIES.forEach(c=>{const o=document.createElement("option");o.value=c[0];o.te
 loadLocal();csel.value=state.country;
 csel.addEventListener("change",e=>{state.country=e.target.value;saveLocal();saveRemote();render();renderPanel();});
 document.getElementById("sort").addEventListener("change",e=>{state.sort=e.target.value;render();});
-makeChips("verdictChips",[[4,"Imprescindible"],[3,"Recomendable"],[2,"Opcional"],[1,"Saltable"]],state.verdicts);
+makeChips("verdictChips",[[4,"Imprescindible"],[3,"Recomendable"],[2,"Opcional"],[1,"Saltable"],[0,"Por estrenar"]],state.verdicts);
 makeChips("doomChips",[[2,"Imprescindible para Doomsday"],[1,"Recomendable para Doomsday"]],state.dooms);
 makeChips("needChips",[[3,"Trama: clave"],[2,"Trama: contexto útil"],[1,"Trama: prescindible"],[0,"Independiente"]],state.needs);
 makeChips("blockChips",Object.entries(BLOCKS).map(([k,b])=>[k,b.name]),state.blocks);
@@ -1002,7 +1076,7 @@ initProgress();
 setInterval(renderPanel,3600000);
 renderRoutes();
 document.getElementById("fbtn").addEventListener("click",()=>{const c=document.getElementById("controls");const o=c.classList.toggle("show-filters");document.getElementById("fbtn").setAttribute("aria-expanded",o);});
-document.getElementById("clearF").addEventListener("click",()=>{[state.verdicts,state.needs,state.blocks].forEach(x=>x.clear());document.querySelectorAll(".filters .chip").forEach(b=>b.setAttribute("aria-pressed","false"));render();});
+document.getElementById("clearF").addEventListener("click",()=>{[state.verdicts,state.needs,state.blocks,state.dooms].forEach(x=>x.clear());document.querySelectorAll(".filters .chip").forEach(b=>b.setAttribute("aria-pressed","false"));render();});
 
 // ===== Mapa del multiverso =====
 const LANES=[
@@ -1025,7 +1099,7 @@ const MV=[
 ["1962","X","X-Men: Primera generación","Juventud de Xavier, Magneto y Mística; no necesita nada previo",1],
 ["Hasta 1979","X","X-Men orígenes: Lobezno","Pasado de Logan y el Deadpool del que se burla Deadpool y Lobezno",1],
 ["1992-1997","A","X-Men: La serie animada","Adapta los grandes arcos de Claremont",0],
-["Después","A","X-Men '97","Continuación directa",0],
+["Después","A","X-Men '97 T1-T2","Continuación directa; en la T2, Apocalipsis y viajes en el tiempo",0],
 ["1995","U","Capitana Marvel","Carol, un Fury joven y la guerra Kree-Skrull",1],
 ["1998-2004","O","Trilogía de Blade","Blade (Snipes) reaparece en el Vacío de Deadpool y Lobezno",0],
 ["Años 2000","X","X-Men","Arranca la trilogía original",1],
@@ -1099,13 +1173,16 @@ const MV=[
 ["2026","U","Ant-Man y la Avispa: Quantumanía","Kang, descartado como villano",0],
 ["2026","U","Guardianes de la Galaxia Vol. 3","Cierre de los Guardianes",1],
 ["2026","U","Agatha, ¿quién si no?","Billy como Wiccan",1],
-["2026","N U","Daredevil: Born Again","La vía de Netflix se funde con el UCM: Matt, Fisk alcalde, Karen y Punisher",1,"x"],
+["2026","N U","Daredevil: Born Again T1-T2","La vía de Netflix se funde con el UCM: Matt, Fisk alcalde, Karen y Punisher. En la T2 vuelven Jessica Jones y Luke Cage, y Matt revela su identidad",1,"x"],
+["2026","U","The Punisher: One Last Kill","Frank, entre Born Again y Brand New Day",1],
 ["2027","U","Capitán América: Un nuevo mundo","Sam como Capitán; Ross, presidente",1],
 ["2027","U","Thunderbolts*","Los nuevos Vengadores",1],
 ["2027","U","Ironheart","Mefisto y Hood quedan abiertos",0],
-["2027","U","Wonder Man","Sin consecuencias conocidas",0],
+["2027","U","Wonder Man","Cierra el arco de Trevor Slattery",0],
+["2028","U","Spider-Man: Brand New Day","Cuatro años tras No Way Home: Peter con Punisher, Hulk y Yelena, y una joven mutante psiónica (Sadie Sink)",1],
+["Hacia 2028","U","VisionQuest","Estreno: 14 de octubre de 2026. Visión blanco, Ultrón (Spader) y Tommy",1,"f"],
 ["Años 60 retrofuturistas","F","Los 4 Fantásticos: Primeros pasos","Galactus y Silver Surfer; su final mira a Doomsday",1],
-["14 meses tras Thunderbolts*","U F X","Vengadores: Doomsday","Estreno: 18 de diciembre de 2026. Reúne Tierra-616, Tierra-828 y unos X-Men con el reparto de Fox (Stewart, McKellen, Marsden). Downey Jr. es Doctor Doom",1,"f"]
+["2028-2029, 14 meses tras Thunderbolts*","U F X","Vengadores: Doomsday","Estreno: 18 de diciembre de 2026. Reúne Tierra-616, Tierra-828 y unos X-Men con el reparto de Fox (Stewart, McKellen, Marsden). Downey Jr. es Doctor Doom",1,"f"]
 ].map(r=>({y:r[0],l:r[1].split(" "),t:r[2],n:r[3],core:!!r[4],k:r[5]||""}));
 
 let mvMode="core";
