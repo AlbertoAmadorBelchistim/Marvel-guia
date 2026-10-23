@@ -91,6 +91,15 @@ h1{font-stretch:62%;font-weight:900;font-size:clamp(56px,17vw,104px);line-height
 .screen b{color:var(--ink);font-weight:600}
 .opt{font-size:13px;color:var(--muted);font-weight:600;margin-left:6px}
 .warn{margin-top:8px;font-size:14px;color:var(--warn);font-weight:600}
+.ed{margin-top:10px;border-left:3px solid var(--hair);padding:2px 0 2px 12px;font-size:14px}
+.ed-h{color:var(--muted)}
+.ed-h b{color:var(--ink);font-weight:700}
+.ed ol{margin:4px 0 0;padding:0 0 0 18px}
+.ed li{margin:3px 0}
+.ed li.single{list-style:none;margin-left:-18px}
+.ed a{color:var(--ink);font-weight:600;text-underline-offset:3px}
+.ed .meta{color:var(--muted)}
+.ed .out{color:var(--warn)}
 .hidden{display:none}
 .empty{padding:30px 0 0 52px;color:var(--muted)}
 
@@ -198,6 +207,9 @@ const ACTS = [
   {id:"hox",t:"House of X / Powers of X",b:"Hickman, Larraz y Silva · 2019",w:"Los mutantes fundan su propia nación.",l:["xmen"]}
  ]}
 ];
+
+// Ediciones en castellano: c = colección; t = tomos {n: título, i: números USA, p: precio, u: enlace verificado, a: 0 si agotado}
+const EDS = {};
 
 const KEY="rutaMarvel.leidos";
 let read=new Set();
@@ -314,6 +326,18 @@ const check='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L1
 
 function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 
+function edHtml(s){
+  const e=EDS[s.id];if(!e||!e.t||!e.t.length)return "";
+  const n=e.t.length;
+  const head=`<div class="ed-h"><b>${n===1?"Un tomo":n+" tomos"}</b> en castellano · ${esc(e.c)}</div>`;
+  const items=e.t.map(t=>{
+    const name=t.u?`<a href="${esc(t.u)}" target="_blank" rel="noopener">${esc(t.n)}</a>`:`<span>${esc(t.n)}</span>`;
+    const meta=[t.i,t.p].filter(Boolean).map(esc).join(" · ");
+    const out=t.u&&t.a===0?` <span class="out">agotado en Panini</span>`:"";
+    return `<li${n===1?' class="single"':""}>${name}${meta?` <span class="meta">(${meta})</span>`:""}${out}</li>`;
+  }).join("");
+  return `<div class="ed">${head}<ol>${items}</ol>${e.note?`<div class="meta">${esc(e.note)}</div>`:""}</div>`;
+}
 function render(){
   document.documentElement.style.setProperty("--rail", filter?LINES[filter].c:"var(--ink)");
   let n=0, html="";
@@ -332,6 +356,7 @@ function render(){
         <p class="why">${esc(s.w)}</p>
         <div class="tags">${s.l.map(k=>`<span class="tag" style="--c:${LINES[k].c}"><i></i>${LINES[k].n}</span>`).join("")}</div>
         ${s.p?`<div class="screen">En pantalla: <b>${esc(s.p)}</b></div>`:""}
+        ${edHtml(s)}
         ${s.x?`<div class="warn">${esc(s.x)}</div>`:""}
       </article>`;
     });
