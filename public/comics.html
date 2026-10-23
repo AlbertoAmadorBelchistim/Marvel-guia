@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La ruta Marvel: los mejores cómics en orden</title>
+<meta name="description" content="Los mejores cómics de Marvel en orden narrativo, con progreso de lectura y su conexión con el UCM.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --paper:#FAFAF7; --ink:#1C2340; --muted:#5B6275; --hair:#D9DBE3; --soft:#EEF0F5;
+  --gift:#FFE14D; --gift-ink:#1C2340; --warn:#B42318;
+  --rail:var(--ink);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#12152A; --ink:#ECEEF6; --muted:#A3A9BD; --hair:#2C3150; --soft:#1C2140;
+    --gift:#FFE14D; --gift-ink:#12152A; --warn:#FF8A7A;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12152A; --ink:#ECEEF6; --muted:#A3A9BD; --hair:#2C3150; --soft:#1C2140;
+  --gift:#FFE14D; --gift-ink:#12152A; --warn:#FF8A7A;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 120px)}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:0 18px 64px}
+
+header.hero{padding:36px 0 18px}
+h1{font-stretch:62%;font-weight:900;font-size:clamp(56px,17vw,104px);line-height:.86;
+  letter-spacing:-.01em;margin:0}
+.lede{margin:14px 0 0;color:var(--muted);max-width:34em}
+.progress{margin-top:22px;display:flex;align-items:center;gap:12px}
+.bar{flex:1;height:10px;background:var(--soft);border-radius:5px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--rail);transition:width .4s ease}
+.count{font-stretch:75%;font-weight:700;font-size:15px;white-space:nowrap}
+
+.controls{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);
+  padding:10px 0 12px;border-bottom:1px solid var(--hair)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--hair);
+  background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:600;
+  font-stretch:85%;padding:7px 12px;border-radius:999px;cursor:pointer}
+.chip .dot{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.chip[aria-pressed="true"]{background:var(--c,var(--ink));border-color:var(--c,var(--ink));color:#fff}
+.chip[aria-pressed="true"] .dot{background:#fff}
+.toggle{margin-top:10px;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
+.toggle input{width:18px;height:18px;accent-color:var(--ink)}
+
+.route{position:relative;margin-top:8px}
+.act{position:relative;padding:30px 0 6px 52px}
+.act::before{content:"";position:absolute;left:14px;top:0;bottom:0;width:6px;background:var(--rail);opacity:.18}
+.act h2{font-stretch:62%;font-weight:900;font-size:34px;line-height:1;margin:0}
+.act .era{color:var(--muted);font-size:14px;margin-top:4px}
+.act .node{position:absolute;left:3px;top:30px;width:28px;height:28px;border-radius:7px;
+  background:var(--rail);transform:rotate(45deg)}
+
+.stop{position:relative;padding:16px 0 16px 52px}
+.stop::before{content:"";position:absolute;left:14px;top:0;bottom:0;width:6px;background:var(--rail)}
+.stop.op::before{opacity:.35}
+.station{position:absolute;left:1px;top:16px;width:32px;height:32px;border-radius:50%;
+  border:5px solid var(--rail);background:var(--paper);cursor:pointer;padding:0;
+  display:grid;place-items:center;color:var(--paper)}
+.stop.op .station{border-style:dashed;border-width:3px;width:26px;height:26px;left:4px;top:19px}
+.station svg{width:16px;height:16px;opacity:0}
+.stop.read .station{background:var(--rail)}
+.stop.read .station svg{opacity:1}
+.station:focus-visible,.chip:focus-visible{outline:3px solid var(--gift);outline-offset:2px}
+.num{font-stretch:75%;font-weight:700;font-size:13px;color:var(--muted)}
+.stop h3{margin:2px 0 0;font-size:19px;line-height:1.2;font-weight:800;font-stretch:90%}
+.stop.read h3{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--muted)}
+.by{color:var(--muted);font-size:14px;margin-top:2px}
+.why{margin:6px 0 0;max-width:36em}
+.tags{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;font-stretch:85%}
+.tag i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.screen{margin-top:6px;font-size:14px;color:var(--muted)}
+.screen b{color:var(--ink);font-weight:600}
+.opt{font-size:13px;color:var(--muted);font-weight:600;margin-left:6px}
+.gift{margin-top:10px;background:var(--gift);color:var(--gift-ink);padding:10px 12px;border-radius:4px;font-size:14px}
+.gift strong{font-weight:800}
+.warn{margin-top:8px;font-size:14px;color:var(--warn);font-weight:600}
+.hidden{display:none}
+.empty{padding:30px 0 0 52px;color:var(--muted)}
+
+footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--hair);color:var(--muted);font-size:14px}
+footer button{font:inherit;color:var(--ink);background:none;border:1.5px solid var(--hair);
+  border-radius:999px;padding:6px 12px;cursor:pointer;margin-top:10px}
+@media (prefers-reduced-motion: reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <h1>La ruta<br>Marvel</h1>
+    <p class="lede">Los mejores cómics de Marvel en el orden en que ocurren, de Logan en el siglo XIX hasta el fin del multiverso. Toca el círculo de cada parada cuando lo termines.</p>
+    <div class="progress"><div class="bar"><i id="bar"></i></div><span class="count" id="count">0 de 0 leídos</span></div>
+  </header>
+
+  <div class="controls">
+    <div class="chips" id="chips" role="group" aria-label="Filtrar por línea"></div>
+    <label class="toggle"><input type="checkbox" id="core"> Solo las imprescindibles</label>
+  </div>
+
+  <main class="route" id="route"></main>
+
+  <footer>
+    Línea continua: imprescindible. Línea discontinua: opcional, para quien quiera más.<br>
+    Los años indican cuándo se publicó cada obra.<br>
+    <button id="reset" type="button">Borrar mi progreso</button><br><br>
+    <a href="/" style="color:inherit">Guía Marvel en pantalla</a> · <a href="/privacidad" style="color:inherit">Privacidad</a> · Guía personal, sin afiliación con Marvel ni Disney.
+  </footer>
+</div>
+
+<script>
+const LINES = {
+  universo:{n:"Universo Marvel",c:"#475569"},
+  vengadores:{n:"Vengadores",c:"#6D28D9"},
+  cap:{n:"Capitán América",c:"#1D4ED8"},
+  ironman:{n:"Iron Man",c:"#EA580C"},
+  thor:{n:"Thor",c:"#0F766E"},
+  hulk:{n:"Hulk",c:"#16A34A"},
+  spidey:{n:"Spider-Man",c:"#DC2626"},
+  daredevil:{n:"Daredevil",c:"#9F1239"},
+  xmen:{n:"X-Men",c:"#CA8A04"},
+  cosmico:{n:"Cósmico",c:"#C026D3"},
+  fantasticos:{n:"4 Fantásticos y Doom",c:"#0284C7"}
+};
+
+const ACTS = [
+ {t:"Los orígenes", e:"Del siglo XIX a la Segunda Guerra Mundial", s:[
+  {id:"origen",t:"Lobezno: Orígenes",b:"Jenkins, Kubert y Quesada · 2001",w:"El pasado de Logan, contado por fin desde su infancia en el Canadá del siglo XIX.",l:["xmen"],op:1},
+  {id:"blanco",t:"Capitán América: Blanco",b:"Loeb y Sale · 2015",w:"Steve y Bucky en plena guerra. Ternura, humor y pérdida.",l:["cap"],op:1,p:"Capitán América: El primer vengador",x:"Sin edición en castellano en catálogo: buscar de segunda mano."},
+  {id:"doom",t:"Los Libros de Doom",b:"Brubaker y Raimondi · 2006",w:"Cómo un genio herido acaba convertido en el villano definitivo.",l:["fantasticos"],op:1,p:"Vengadores: Doomsday"}
+ ]},
+ {t:"La era heroica", e:"De 1939 a 1973", s:[
+  {id:"marvels1",t:"Marvels (n.º 0 a 3)",b:"Busiek y Ross · 1994",w:"El nacimiento de los héroes visto desde la calle, por un fotógrafo de prensa.",l:["universo"],g:"Primer regalo. Marvel Must-Have n.º 32 de Panini: incluye la obra completa, así que sirve también para la parada 8."},
+  {id:"gris",t:"Hulk: Gris",b:"Loeb y Sale · 2003",w:"Los primeros días del monstruo, contados como una historia de amor con Betty.",l:["hulk"],p:"El increíble Hulk"},
+  {id:"amarillo",t:"Daredevil: Amarillo",b:"Loeb y Sale · 2001",w:"Matt Murdock antes del traje rojo, en cartas a Karen Page.",l:["daredevil"],p:"Daredevil"},
+  {id:"azul",t:"Spider-Man: Azul",b:"Loeb y Sale · 2002",w:"Peter recuerda cómo se enamoró de Gwen Stacy.",l:["spidey"]},
+  {id:"marvels2",t:"Marvels (n.º 4 y Epílogo)",b:"Busiek y Ross · 1994",w:"La muerte de Gwen Stacy: el día en que los héroes dejaron de ser infalibles.",l:["universo","spidey"]}
+ ]},
+ {t:"Los clásicos", e:"De 1975 a 1991", s:[
+  {id:"fenix",t:"Giant-Size X-Men n.º 1 y La Saga de Fénix",b:"Wein, Claremont y Cockrum · 1975–77",w:"Nace la nueva Patrulla-X y Jean Grey se convierte en Fénix. Prepara la siguiente parada.",l:["xmen"]},
+  {id:"oscura",t:"La Saga de Fénix Oscura",b:"Claremont y Byrne · 1980",w:"La gran tragedia mutante.",l:["xmen"],p:"X-Men: Fénix Oscura"},
+  {id:"dofp",t:"Días del Futuro Pasado",b:"Claremont y Byrne · 1981",w:"Un futuro de persecución mutante en solo dos números.",l:["xmen"],p:"X-Men: Días del futuro pasado"},
+  {id:"botella",t:"Iron Man: El demonio en una botella",b:"Michelinie, Layton y Romita Jr. · 1979",w:"Tony Stark contra su alcoholismo.",l:["ironman"],op:1,p:"Iron Man 2, de pasada"},
+  {id:"simonson",t:"Thor de Walt Simonson",b:"Simonson · 1983–87",w:"La etapa épica del dios del trueno: Beta Ray Bill y Surtur.",l:["thor"],op:1,p:"Thor: Ragnarok"},
+  {id:"bornagain",t:"Daredevil: Born Again",b:"Miller y Mazzucchelli · 1986",w:"Kingpin descubre quién es Daredevil y lo destruye todo.",l:["daredevil"],p:"Daredevil: Born Again"},
+  {id:"kraven",t:"La última cacería de Kraven",b:"DeMatteis y Zeck · 1987",w:"Kraven entierra vivo a Spider-Man. La cara más oscura de Peter.",l:["spidey"]},
+  {id:"tormento",t:"Doctor Extraño y Doctor Doom: Triunfo y Tormento",b:"Stern y Mignola · 1989",w:"Doom baja al infierno a rescatar el alma de su madre.",l:["fantasticos"],op:1},
+  {id:"busqueda",t:"La Búsqueda de Thanos",b:"Starlin y Lim · 1990",w:"Thanos reúne las Gemas del Infinito. Prepara la siguiente parada.",l:["cosmico"]},
+  {id:"guantelete",t:"El Guantelete del Infinito",b:"Starlin, Pérez y Lim · 1991",w:"Thanos chasquea los dedos.",l:["cosmico","vengadores","universo"],p:"Vengadores: Infinity War y Endgame"}
+ ]},
+ {t:"La era moderna", e:"De 2003 a 2008", s:[
+  {id:"waid",t:"Los 4 Fantásticos: Impensable y Acción Autoritativa",b:"Waid y Wieringo · 2003–04",w:"Doom en su versión más cruel, y la respuesta de Reed en Latveria.",l:["fantasticos"],p:"Los 4 Fantásticos: Primeros pasos"},
+  {id:"desunidos",t:"Vengadores: Desunidos",b:"Bendis y Finch · 2004",w:"Wanda pierde el control y los Vengadores se rompen.",l:["vengadores"],p:"WandaVision"},
+  {id:"invierno",t:"Capitán América: El Soldado de Invierno",b:"Brubaker y Epting · 2005",w:"Bucky está vivo.",l:["cap"],p:"Capitán América: El Soldado de Invierno"},
+  {id:"dinastia",t:"Dinastía de M",b:"Bendis y Coipel · 2005",w:"Wanda reescribe la realidad y deja a los mutantes al borde de la extinción.",l:["xmen","vengadores"],p:"WandaVision y Doctor Strange en el multiverso de la locura"},
+  {id:"extremis",t:"Iron Man: Extremis",b:"Ellis y Granov · 2005–06",w:"Tony se fusiona con su armadura.",l:["ironman"],p:"Iron Man 3"},
+  {id:"aniquilacion",t:"Aniquilación",b:"Giffen y otros · 2006",w:"Una guerra cósmica que reúne a los futuros Guardianes.",l:["cosmico"],op:1},
+  {id:"planeta",t:"Planeta Hulk",b:"Pak, Pagulayan y Lopresti · 2006–07",w:"Hulk, exiliado en Sakaar, pasa de gladiador a rey.",l:["hulk"],p:"Thor: Ragnarok"},
+  {id:"civilwar",t:"Civil War",b:"Millar y McNiven · 2006–07",w:"Cap contra Tony por el registro de superhéroes.",l:["universo","cap","ironman","spidey"],p:"Capitán América: Civil War"},
+  {id:"muerte",t:"La muerte del Capitán América",b:"Brubaker y Epting · 2007",w:"El precio de Civil War, y Bucky frente al escudo.",l:["cap"],p:"Falcon y el Soldado de Invierno"},
+  {id:"wwh",t:"World War Hulk",b:"Pak y Romita Jr. · 2007",w:"Hulk vuelve de Sakaar a por quienes lo exiliaron.",l:["hulk","vengadores"]},
+  {id:"invasion",t:"Invasión Secreta",b:"Bendis y Yu · 2008",w:"Los Skrull llevan años suplantando a los héroes.",l:["vengadores"],op:1,p:"Invasión Secreta"},
+  {id:"guardianes",t:"Guardianes de la Galaxia",b:"Abnett, Lanning y Pelletier · 2008",w:"El equipo de Star-Lord, Rocket y Groot que inspiró las películas.",l:["cosmico"],op:1,p:"Guardianes de la Galaxia"}
+ ]},
+ {t:"Hacia Secret Wars", e:"De 2009 a 2015", s:[
+  {id:"hickmanff",t:"4 Fantásticos y Fundación Futuro de Hickman",b:"Hickman y otros · 2009–12",w:"Reed, Doom y los hilos que acabarán en Secret Wars.",l:["fantasticos"],op:1},
+  {id:"carnicero",t:"Thor: El Carnicero de Dioses",b:"Aaron y Ribić · 2012–13",w:"Gorr asesina dioses a lo largo de tres épocas de Thor.",l:["thor"],p:"Thor: Love and Thunder"},
+  {id:"ojo",t:"Ojo de Halcón",b:"Fraction y Aja · 2012–15",w:"Clint Barton en sus días libres: ingenioso y muy humano.",l:["vengadores"],p:"Ojo de Halcón"},
+  {id:"hickmanav",t:"Vengadores y Nuevos Vengadores de Hickman, con Infinito",b:"Hickman y otros · 2012–15",w:"Los Illuminati contra la destrucción de universos enteros. Es el bloque largo de la ruta.",l:["vengadores","cosmico","fantasticos"],p:"Vengadores: Doomsday"},
+  {id:"tiempo",t:"Se Acaba el Tiempo",b:"Hickman y otros · 2015",w:"Los últimos meses antes del fin.",l:["vengadores"]},
+  {id:"secretwars",t:"Secret Wars",b:"Hickman y Ribić · 2015",w:"El multiverso muere y Doom se convierte en dios.",l:["universo","fantasticos","vengadores"],p:"Vengadores: Secret Wars"}
+ ]},
+ {t:"Epílogo", e:"De 2015 a hoy", s:[
+  {id:"vision",t:"La Visión",b:"King y Walta · 2015–16",w:"Visión se construye una familia en las afueras. Inquietante.",l:["vengadores"],p:"WandaVision"},
+  {id:"inmortal",t:"El Inmortal Hulk",b:"Ewing y Bennett · 2018–21",w:"Hulk convertido en historia de terror.",l:["hulk"]},
+  {id:"hox",t:"House of X / Powers of X",b:"Hickman, Larraz y Silva · 2019",w:"Los mutantes fundan su propia nación.",l:["xmen"]}
+ ]}
+];
+
+const KEY="rutaMarvel.leidos";
+let read=new Set();
+try{const v=localStorage.getItem(KEY);if(v)read=new Set(JSON.parse(v))}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify([...read]))}catch(e){}}
+
+let filter=null, coreOnly=false;
+const route=document.getElementById("route");
+const check='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+function render(){
+  document.documentElement.style.setProperty("--rail", filter?LINES[filter].c:"var(--ink)");
+  let n=0, html="";
+  ACTS.forEach(a=>{
+    const stops=a.s.filter(s=>(!filter||s.l.includes(filter))&&(!coreOnly||!s.op));
+    a.s.forEach(s=>{s.n=++n});
+    if(!stops.length)return;
+    html+=`<section class="act"><span class="node" aria-hidden="true"></span><h2>${esc(a.t)}</h2><div class="era">${esc(a.e)}</div></section>`;
+    stops.forEach(s=>{
+      const r=read.has(s.id);
+      html+=`<article class="stop${s.op?" op":""}${r?" read":""}">
+        <button class="station" data-id="${s.id}" aria-pressed="${r}" aria-label="Marcar ${esc(s.t)} como leído">${check}</button>
+        <div class="num">Parada ${s.n}${s.op?'<span class="opt">opcional</span>':""}</div>
+        <h3>${esc(s.t)}</h3>
+        <div class="by">${esc(s.b)}</div>
+        <p class="why">${esc(s.w)}</p>
+        <div class="tags">${s.l.map(k=>`<span class="tag" style="--c:${LINES[k].c}"><i></i>${LINES[k].n}</span>`).join("")}</div>
+        ${s.p?`<div class="screen">En pantalla: <b>${esc(s.p)}</b></div>`:""}
+        ${s.g?`<div class="gift"><strong>🎁 ${esc(s.g.split(". ")[0])}.</strong> ${esc(s.g.split(". ").slice(1).join(". "))}</div>`:""}
+        ${s.x?`<div class="warn">${esc(s.x)}</div>`:""}
+      </article>`;
+    });
+  });
+  route.innerHTML=html||`<p class="empty">No hay paradas con este filtro.</p>`;
+  updateProgress();
+}
+
+function updateProgress(){
+  const all=ACTS.flatMap(a=>a.s).filter(s=>!coreOnly||!s.op);
+  const done=all.filter(s=>read.has(s.id)).length;
+  document.getElementById("count").textContent=`${done} de ${all.length} leídos`;
+  document.getElementById("bar").style.width=(all.length?done/all.length*100:0)+"%";
+}
+
+route.addEventListener("click",e=>{
+  const b=e.target.closest(".station");if(!b)return;
+  const id=b.dataset.id;
+  read.has(id)?read.delete(id):read.add(id);
+  save();
+  const art=b.closest(".stop");art.classList.toggle("read",read.has(id));
+  b.setAttribute("aria-pressed",read.has(id));
+  updateProgress();
+});
+
+const chips=document.getElementById("chips");
+function chip(key,label,color){
+  const b=document.createElement("button");
+  b.className="chip";b.type="button";
+  b.setAttribute("aria-pressed",String(filter===key));
+  if(color)b.style.setProperty("--c",color);
+  b.innerHTML=(color?'<span class="dot"></span>':"")+esc(label);
+  b.onclick=()=>{filter=key;buildChips();render()};
+  return b;
+}
+function buildChips(){
+  chips.innerHTML="";
+  chips.appendChild(chip(null,"Toda la ruta",null));
+  Object.entries(LINES).forEach(([k,v])=>chips.appendChild(chip(k,v.n,v.c)));
+}
+document.getElementById("core").addEventListener("change",e=>{coreOnly=e.target.checked;render()});
+document.getElementById("reset").addEventListener("click",()=>{
+  if(confirm("¿Borrar todas las paradas marcadas como leídas?")){read.clear();save();render()}
+});
+buildChips();render();
+</script>
+</body>
+</html>

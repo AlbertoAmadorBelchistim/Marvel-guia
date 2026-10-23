@@ -16,6 +16,7 @@ Página estática con 116 películas y series de Marvel comparadas con los arcos
 
 ```
 public/index.html           # la página entera: HTML, CSS, JS y datos en un solo archivo
+public/comics.html          # ruta de lectura de cómics (página aparte, progreso solo en el navegador)
 public/_headers             # cabeceras de Cloudflare Pages (caché y seguridad)
 functions/api/[[path]].js   # API de cuentas y progreso (Pages Functions)
 migrations/                 # esquema de la base de datos D1 (0002 es el vigente)
