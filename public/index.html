@@ -1,4 +1,6 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+@media (max-width:820px){.sections{position:static;justify-content:flex-end;flex-wrap:wrap;gap:5px;margin:0 0 16px}header.hero h1{margin-top:0}}
+</style></head><body>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -36,9 +38,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.55 var(--
 .wrap{max-width:980px;margin:0 auto;padding:0 18px}
 header.hero{position:relative;padding:40px 0 28px;border-bottom:3px solid var(--ink);overflow:hidden}
 header.hero .wrap{position:relative}
-.switch{position:absolute;top:-26px;right:18px;z-index:1;display:inline-flex;align-items:center;border:2px solid var(--ink);border-radius:999px;padding:5px 13px;font:600 14px/1.2 var(--body);color:var(--ink);text-decoration:none;background:var(--card)}
-.switch:hover{background:var(--ink);color:var(--paper)}
-.switch:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+.sections{position:absolute;top:-26px;right:18px;z-index:1;display:flex;gap:6px}.sections a{border:2px solid var(--ink);border-radius:999px;padding:5px 12px;font:600 14px/1.2 var(--body);color:var(--ink);text-decoration:none;background:var(--card);white-space:nowrap}.sections a[aria-current]{background:var(--ink);color:var(--paper)}.sections a:not([aria-current]):hover{background:var(--ink);color:var(--paper)}.sections a:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 header.hero h1{margin-top:12px}
 header.hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(var(--dot) 1.6px,transparent 1.7px);background-size:9px 9px;
   -webkit-mask-image:linear-gradient(115deg,transparent 35%,#000 100%);mask-image:linear-gradient(115deg,transparent 35%,#000 100%);pointer-events:none}
@@ -183,8 +183,8 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
   .detail{grid-template-columns:1fr}
   .jump{display:none}
   header.hero{padding:26px 0 20px}
-  .switch{top:-16px}
-  header.hero h1{margin-top:26px}
+  .sections a{font-size:13px;padding:4px 10px}
+  
 }
 
 .mv{padding:34px 0 50px;scroll-margin-top:60px;border-top:3px solid var(--ink)}
@@ -219,7 +219,7 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
 <body>
 <header class="hero">
   <div class="wrap">
-    <a class="switch" href="/comics">Ruta de cómics</a>
+    <nav class="sections" aria-label="Secciones"><a href="/" aria-current="page">Películas</a><a href="/comics">Cómics Marvel</a><a href="/dc">Cómics DC</a></nav>
     <h1 id="top">Marvel en pantalla, contra el cómic</h1>
     <p class="lede">Más de cien películas y series comparadas con los arcos que adaptan: cuánto respetan, qué cambian y si merece la pena verlas. Los porcentajes son una estimación personal y están aquí para discutirse.</p>
     <div class="tally" id="tally"></div>
@@ -752,7 +752,7 @@ function endSession(callServer){
   saveSession();
   try{if(window.google&&google.accounts)google.accounts.id.disableAutoSelect();}catch(e){}
   // En un equipo compartido, lo marcado no debe quedar a la vista del siguiente.
-  watched.clear();saveLocal();try{localStorage.removeItem("rutaMarvel.leidos");}catch(e){}render();
+  watched.clear();saveLocal();try{["rutaMarvel.leidos","rutaDC.leidos"].forEach(k=>localStorage.removeItem(k));}catch(e){}render();
 }
 // --- Inicio de sesión con Google (Google Identity Services) ---
 const GOOGLE_CLIENT_ID="965357339286-prasf832d5odh57em5nmgrhc1kmoqn48.apps.googleusercontent.com";
