@@ -35,6 +35,11 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.55 var(--body);-webkit-text-size-adjust:100%}
 .wrap{max-width:980px;margin:0 auto;padding:0 18px}
 header.hero{position:relative;padding:40px 0 28px;border-bottom:3px solid var(--ink);overflow:hidden}
+header.hero .wrap{position:relative}
+.switch{position:absolute;top:-26px;right:18px;z-index:1;display:inline-flex;align-items:center;border:2px solid var(--ink);border-radius:999px;padding:5px 13px;font:600 14px/1.2 var(--body);color:var(--ink);text-decoration:none;background:var(--card)}
+.switch:hover{background:var(--ink);color:var(--paper)}
+.switch:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+header.hero h1{margin-top:12px}
 header.hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(var(--dot) 1.6px,transparent 1.7px);background-size:9px 9px;
   -webkit-mask-image:linear-gradient(115deg,transparent 35%,#000 100%);mask-image:linear-gradient(115deg,transparent 35%,#000 100%);pointer-events:none}
 h1{font:900 clamp(2.6rem,9vw,5.2rem)/.9 var(--display);margin:0 0 14px;letter-spacing:.005em;max-width:12ch;position:relative}
@@ -178,6 +183,8 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
   .detail{grid-template-columns:1fr}
   .jump{display:none}
   header.hero{padding:26px 0 20px}
+  .switch{top:-16px}
+  header.hero h1{margin-top:26px}
 }
 
 .mv{padding:34px 0 50px;scroll-margin-top:60px;border-top:3px solid var(--ink)}
@@ -212,6 +219,7 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
 <body>
 <header class="hero">
   <div class="wrap">
+    <a class="switch" href="/comics">Ruta de cómics</a>
     <h1 id="top">Marvel en pantalla, contra el cómic</h1>
     <p class="lede">Más de cien películas y series comparadas con los arcos que adaptan: cuánto respetan, qué cambian y si merece la pena verlas. Los porcentajes son una estimación personal y están aquí para discutirse.</p>
     <div class="tally" id="tally"></div>
@@ -280,7 +288,7 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
   <div class="metro" id="metro" role="list"></div>
 </section>
 
-<footer><div class="wrap">Guía personal, sin afiliación con Marvel ni Disney. Actualizada en octubre de 2026. · <a href="/comics" style="color:inherit">Ruta de cómics</a> · <a href="/privacidad" style="color:inherit">Privacidad</a> · <a href="/condiciones" style="color:inherit">Condiciones</a></div></footer>
+<footer><div class="wrap">Guía personal, sin afiliación con Marvel ni Disney. Actualizada en octubre de 2026. · <a href="/privacidad" style="color:inherit">Privacidad</a> · <a href="/condiciones" style="color:inherit">Condiciones</a></div></footer>
 
 
 <script>
@@ -744,7 +752,7 @@ function endSession(callServer){
   saveSession();
   try{if(window.google&&google.accounts)google.accounts.id.disableAutoSelect();}catch(e){}
   // En un equipo compartido, lo marcado no debe quedar a la vista del siguiente.
-  watched.clear();saveLocal();render();
+  watched.clear();saveLocal();try{localStorage.removeItem("rutaMarvel.leidos");}catch(e){}render();
 }
 // --- Inicio de sesión con Google (Google Identity Services) ---
 const GOOGLE_CLIENT_ID="965357339286-prasf832d5odh57em5nmgrhc1kmoqn48.apps.googleusercontent.com";

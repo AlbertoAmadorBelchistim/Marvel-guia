@@ -5,6 +5,8 @@
 //   GET    /api/me                                    -> {email, name}
 //   GET    /api/progress                              -> {watched, country, updated_at}
 //   PUT    /api/progress   {watched, country}         -> {ok, updated_at}
+//   GET    /api/comics                                -> {read, updated_at}
+//   PUT    /api/comics     {read}                     -> {ok, updated_at}
 //   DELETE /api/account                               -> {ok}
 //
 // Inicio de sesión con Google: la página obtiene un ID token (JWT firmado por Google)
@@ -226,9 +228,29 @@ export async function onRequest(context) {
       return json({ ok: true, updated_at: now });
     }
 
+    if (path === "/comics" && method === "GET") {
+      const row = await db.prepare("SELECT read, updated_at FROM comic_progress WHERE user_id = ?").bind(user.id).first();
+      return json({ read: row ? JSON.parse(row.read) : [], updated_at: row ? row.updated_at : 0 });
+    }
+
+    if (path === "/comics" && method === "PUT") {
+      const body = await readJson(request);
+      const read = cleanWatched(body.read);
+      if (!read) return err(400, "invalid", "Formato de progreso no válido.");
+      await db
+        .prepare(
+          `INSERT INTO comic_progress (user_id, read, updated_at) VALUES (?1, ?2, ?3)
+           ON CONFLICT(user_id) DO UPDATE SET read = ?2, updated_at = ?3`
+        )
+        .bind(user.id, JSON.stringify(read), now)
+        .run();
+      return json({ ok: true, updated_at: now });
+    }
+
     if (path === "/account" && method === "DELETE") {
       await db.batch([
         db.prepare("DELETE FROM progress WHERE user_id = ?").bind(user.id),
+        db.prepare("DELETE FROM comic_progress WHERE user_id = ?").bind(user.id),
         db.prepare("DELETE FROM sessions WHERE user_id = ?").bind(user.id),
         db.prepare("DELETE FROM users WHERE id = ?").bind(user.id),
       ]);

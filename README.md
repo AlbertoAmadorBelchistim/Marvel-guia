@@ -16,10 +16,10 @@ Página estática con 116 películas y series de Marvel comparadas con los arcos
 
 ```
 public/index.html           # la página entera: HTML, CSS, JS y datos en un solo archivo
-public/comics.html          # ruta de lectura de cómics (página aparte, progreso solo en el navegador)
+public/comics.html          # ruta de lectura de cómics (página aparte, mismo inicio de sesión)
 public/_headers             # cabeceras de Cloudflare Pages (caché y seguridad)
 functions/api/[[path]].js   # API de cuentas y progreso (Pages Functions)
-migrations/                 # esquema de la base de datos D1 (0002 es el vigente)
+migrations/                 # esquema de la base de datos D1 (0002 + 0003, cómics)
 wrangler.toml               # configuración: binding de D1 (DB) y GOOGLE_CLIENT_ID
 ```
 
@@ -27,6 +27,7 @@ No hay build ni dependencias de producción. Para probarla en local con la API y
 
 ```bash
 npx wrangler d1 execute marvel-guia --local --file migrations/0002_google.sql
+npx wrangler d1 execute marvel-guia --local --file migrations/0003_comics.sql
 npx wrangler pages dev
 ```
 
@@ -57,7 +58,9 @@ Seguridad:
 
 El Client ID de Google es público y está en `wrangler.toml` y en `public/index.html`. Para probar en otro dominio hay que añadirlo en *Orígenes de JavaScript autorizados* del cliente OAuth en Google Cloud.
 
-API: `POST /api/google`, `POST /api/logout`, `GET /api/me`, `GET|PUT /api/progress`, `DELETE /api/account`.
+La ruta de cómics (`/comics`) usa la misma sesión: lo leído se guarda aparte, en `comic_progress`, y también se borra al borrar la cuenta.
+
+API: `POST /api/google`, `POST /api/logout`, `GET /api/me`, `GET|PUT /api/progress`, `GET|PUT /api/comics`, `DELETE /api/account`.
 
 ## Aviso
 

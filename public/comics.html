@@ -34,7 +34,11 @@ body{margin:0;background:var(--paper);color:var(--ink);
   font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
 .wrap{max-width:640px;margin:0 auto;padding:0 18px 64px}
 
-header.hero{padding:36px 0 18px}
+header.hero{position:relative;padding:36px 0 18px}
+.switch{position:absolute;top:14px;right:0;display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);border-radius:999px;padding:6px 13px;font-size:14px;font-weight:700;font-stretch:85%;color:var(--ink);text-decoration:none;background:var(--paper)}
+.switch:hover{background:var(--ink);color:var(--paper)}
+.switch:focus-visible{outline:3px solid var(--gift);outline-offset:2px}
+header.hero h1{margin-top:22px}
 h1{font-stretch:62%;font-weight:900;font-size:clamp(56px,17vw,104px);line-height:.86;
   letter-spacing:-.01em;margin:0}
 .lede{margin:14px 0 0;color:var(--muted);max-width:34em}
@@ -86,8 +90,6 @@ h1{font-stretch:62%;font-weight:900;font-size:clamp(56px,17vw,104px);line-height
 .screen{margin-top:6px;font-size:14px;color:var(--muted)}
 .screen b{color:var(--ink);font-weight:600}
 .opt{font-size:13px;color:var(--muted);font-weight:600;margin-left:6px}
-.gift{margin-top:10px;background:var(--gift);color:var(--gift-ink);padding:10px 12px;border-radius:4px;font-size:14px}
-.gift strong{font-weight:800}
 .warn{margin-top:8px;font-size:14px;color:var(--warn);font-weight:600}
 .hidden{display:none}
 .empty{padding:30px 0 0 52px;color:var(--muted)}
@@ -95,15 +97,22 @@ h1{font-stretch:62%;font-weight:900;font-size:clamp(56px,17vw,104px);line-height
 footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--hair);color:var(--muted);font-size:14px}
 footer button{font:inherit;color:var(--ink);background:none;border:1.5px solid var(--hair);
   border-radius:999px;padding:6px 12px;cursor:pointer;margin-top:10px}
+.acct{margin-top:16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:14px;color:var(--muted)}
+.acct b{color:var(--ink);font-weight:600}
+.acct button.link{font:inherit;color:var(--ink);background:none;border:1.5px solid var(--hair);border-radius:999px;padding:5px 11px;cursor:pointer}
+.acct button.link:focus-visible{outline:3px solid var(--gift);outline-offset:2px}
+#gbtn{min-height:40px}
 @media (prefers-reduced-motion: reduce){.bar i{transition:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="hero">
+    <a class="switch" href="/">Películas y series</a>
     <h1>La ruta<br>Marvel</h1>
     <p class="lede">Los mejores cómics de Marvel en el orden en que ocurren, de Logan en el siglo XIX hasta el fin del multiverso. Toca el círculo de cada parada cuando lo termines.</p>
     <div class="progress"><div class="bar"><i id="bar"></i></div><span class="count" id="count">0 de 0 leídos</span></div>
+    <div class="acct" id="acct" aria-live="polite"></div>
   </header>
 
   <div class="controls">
@@ -117,7 +126,7 @@ footer button{font:inherit;color:var(--ink);background:none;border:1.5px solid v
     Línea continua: imprescindible. Línea discontinua: opcional, para quien quiera más.<br>
     Los años indican cuándo se publicó cada obra.<br>
     <button id="reset" type="button">Borrar mi progreso</button><br><br>
-    <a href="/" style="color:inherit">Guía Marvel en pantalla</a> · <a href="/privacidad" style="color:inherit">Privacidad</a> · Guía personal, sin afiliación con Marvel ni Disney.
+    <a href="/privacidad" style="color:inherit">Privacidad</a> · Guía personal, sin afiliación con Marvel ni Disney.
   </footer>
 </div>
 
@@ -143,7 +152,7 @@ const ACTS = [
   {id:"doom",t:"Los Libros de Doom",b:"Brubaker y Raimondi · 2006",w:"Cómo un genio herido acaba convertido en el villano definitivo.",l:["fantasticos"],op:1,p:"Vengadores: Doomsday"}
  ]},
  {t:"La era heroica", e:"De 1939 a 1973", s:[
-  {id:"marvels1",t:"Marvels (n.º 0 a 3)",b:"Busiek y Ross · 1994",w:"El nacimiento de los héroes visto desde la calle, por un fotógrafo de prensa.",l:["universo"],g:"Primer regalo. Marvel Must-Have n.º 32 de Panini: incluye la obra completa, así que sirve también para la parada 8."},
+  {id:"marvels1",t:"Marvels (n.º 0 a 3)",b:"Busiek y Ross · 1994",w:"El nacimiento de los héroes visto desde la calle, por un fotógrafo de prensa.",l:["universo"]},
   {id:"gris",t:"Hulk: Gris",b:"Loeb y Sale · 2003",w:"Los primeros días del monstruo, contados como una historia de amor con Betty.",l:["hulk"],p:"El increíble Hulk"},
   {id:"amarillo",t:"Daredevil: Amarillo",b:"Loeb y Sale · 2001",w:"Matt Murdock antes del traje rojo, en cartas a Karen Page.",l:["daredevil"],p:"Daredevil"},
   {id:"azul",t:"Spider-Man: Azul",b:"Loeb y Sale · 2002",w:"Peter recuerda cómo se enamoró de Gwen Stacy.",l:["spidey"]},
@@ -193,7 +202,111 @@ const ACTS = [
 const KEY="rutaMarvel.leidos";
 let read=new Set();
 try{const v=localStorage.getItem(KEY);if(v)read=new Set(JSON.parse(v))}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify([...read]))}catch(e){}}
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify([...read]))}catch(e){}}
+function save(){saveLocal();saveRemote()}
+
+// --- Cuenta compartida con la guía (misma sesión de Google) ---
+const SESSION_KEY="marvel.session";
+const GOOGLE_CLIENT_ID="965357339286-prasf832d5odh57em5nmgrhc1kmoqn48.apps.googleusercontent.com";
+const acct={token:null,email:null,name:"",status:"idle",remoteAt:0,timer:null,dirty:false,lastSync:0};
+function loadSession(){acct.token=null;acct.email=null;acct.name="";
+  try{const s=JSON.parse(localStorage.getItem(SESSION_KEY)||"null");if(s&&s.token&&s.email){acct.token=s.token;acct.email=s.email;acct.name=s.name||""}}catch(e){}}
+function saveSession(){try{acct.token?localStorage.setItem(SESSION_KEY,JSON.stringify({token:acct.token,email:acct.email,name:acct.name})):localStorage.removeItem(SESSION_KEY)}catch(e){}}
+loadSession();
+async function api(method,path,body){
+  const headers={};
+  if(body!==undefined)headers["content-type"]="application/json";
+  if(acct.token)headers["authorization"]="Bearer "+acct.token;
+  let res;
+  try{res=await fetch("/api"+path,{method,headers,body:body!==undefined?JSON.stringify(body):undefined})}
+  catch(e){throw {code:"network",message:"Sin conexión con el servidor."}}
+  let data={};try{data=await res.json()}catch(e){}
+  if(!res.ok){
+    if(res.status===401&&acct.token&&path!=="/google"){endSession(false)}
+    throw {code:data.error||"http_"+res.status,message:data.message||"Error "+res.status};
+  }
+  return data;
+}
+function setStatus(s){acct.status=s;renderAcct()}
+async function pushRemote(){
+  if(!acct.token)return;
+  clearTimeout(acct.timer);acct.timer=null;setStatus("syncing");
+  try{const r=await api("PUT","/comics",{read:[...read]});acct.dirty=false;acct.remoteAt=r.updated_at;acct.lastSync=Date.now();setStatus("ok")}
+  catch(e){if(acct.token)setStatus("error")}
+}
+function saveRemote(){if(!acct.token)return;acct.dirty=true;clearTimeout(acct.timer);acct.timer=setTimeout(pushRemote,800)}
+function applyRemote(list){read=new Set(list||[]);saveLocal();if(typeof render==="function")render()}
+async function mergeOnLogin(){
+  setStatus("syncing");
+  try{
+    const r=await api("GET","/comics");
+    const before=r.read.length,merged=new Set(r.read);read.forEach(k=>merged.add(k));
+    acct.remoteAt=r.updated_at;applyRemote([...merged]);
+    if(merged.size!==before)await pushRemote();else{acct.lastSync=Date.now();setStatus("ok")}
+  }catch(e){if(acct.token)setStatus("error")}
+}
+async function refreshFromServer(){
+  if(!acct.token)return;
+  if(acct.dirty){await pushRemote();return}
+  try{const r=await api("GET","/comics");if(r.updated_at>acct.remoteAt){acct.remoteAt=r.updated_at;applyRemote(r.read)}acct.lastSync=Date.now();setStatus("ok")}
+  catch(e){if(acct.token)setStatus("error")}
+}
+function endSession(callServer){
+  if(callServer&&acct.token){fetch("/api/logout",{method:"POST",headers:{authorization:"Bearer "+acct.token}}).catch(()=>{})}
+  acct.token=null;acct.email=null;acct.name="";acct.remoteAt=0;acct.dirty=false;acct.lastSync=0;clearTimeout(acct.timer);
+  saveSession();
+  try{if(window.google&&google.accounts)google.accounts.id.disableAutoSelect()}catch(e){}
+  // En un equipo compartido, lo marcado no debe quedar a la vista del siguiente.
+  try{localStorage.removeItem("marvel.watched")}catch(e){}
+  applyRemote([]);renderAcct();
+}
+let gisState="idle";
+function loadGis(){
+  if(gisState!=="idle")return;gisState="loading";
+  const s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";s.async=true;
+  s.onload=()=>{try{google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:onGoogleCredential,auto_select:false,cancel_on_tap_outside:true,use_fedcm_for_button:true,context:"signin",ux_mode:"popup"});gisState="ready"}catch(e){gisState="error"}renderAcct()};
+  s.onerror=()=>{gisState="error";renderAcct()};
+  document.head.append(s);
+}
+async function onGoogleCredential(resp){
+  try{
+    const r=await api("POST","/google",{credential:resp.credential});
+    acct.token=r.token;acct.email=r.email;acct.name=r.name||"";saveSession();renderAcct();
+    await mergeOnLogin();
+  }catch(e){alert(e.message||"No se ha podido iniciar sesión.")}
+}
+function statusText(){
+  if(acct.status==="syncing")return "Guardando…";
+  if(acct.status==="error")return "Sin conexión: se guardará al volver";
+  if(acct.lastSync){const t=new Date(acct.lastSync);return "Guardado "+String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0")}
+  return "";
+}
+function renderAcct(){
+  const box=document.getElementById("acct");if(!box)return;
+  box.textContent="";
+  if(acct.token){
+    const who=document.createElement("span");who.innerHTML="Con tu cuenta: <b></b>";who.querySelector("b").textContent=acct.name||acct.email;
+    const st=document.createElement("span");st.textContent=statusText();
+    const out=document.createElement("button");out.className="link";out.type="button";out.textContent="Cerrar sesión";
+    out.onclick=()=>endSession(true);
+    box.append(who,st,out);
+  }else{
+    const p=document.createElement("span");p.textContent="Tu progreso se guarda en este navegador. Entra con Google para tenerlo en todos tus dispositivos.";
+    const g=document.createElement("div");g.id="gbtn";
+    box.append(p,g);
+    if(gisState==="ready"){try{google.accounts.id.renderButton(g,{type:"standard",theme:"outline",size:"medium",text:"continue_with",shape:"pill",locale:"es"})}catch(e){}}
+    else if(gisState==="error"){g.textContent="No se ha podido cargar el acceso con Google."}
+    else loadGis();
+  }
+}
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"){
+    // Puede haber entrado o salido desde la guía en otra pestaña.
+    const had=acct.token;loadSession();
+    if(acct.token&&acct.token!==had){mergeOnLogin()}else if(!acct.token&&had){acct.lastSync=0;renderAcct()}else refreshFromServer();
+    renderAcct();
+  }else if(acct.dirty)pushRemote();
+});
 
 let filter=null, coreOnly=false;
 const route=document.getElementById("route");
@@ -219,7 +332,6 @@ function render(){
         <p class="why">${esc(s.w)}</p>
         <div class="tags">${s.l.map(k=>`<span class="tag" style="--c:${LINES[k].c}"><i></i>${LINES[k].n}</span>`).join("")}</div>
         ${s.p?`<div class="screen">En pantalla: <b>${esc(s.p)}</b></div>`:""}
-        ${s.g?`<div class="gift"><strong>🎁 ${esc(s.g.split(". ")[0])}.</strong> ${esc(s.g.split(". ").slice(1).join(". "))}</div>`:""}
         ${s.x?`<div class="warn">${esc(s.x)}</div>`:""}
       </article>`;
     });
@@ -262,9 +374,9 @@ function buildChips(){
 }
 document.getElementById("core").addEventListener("change",e=>{coreOnly=e.target.checked;render()});
 document.getElementById("reset").addEventListener("click",()=>{
-  if(confirm("¿Borrar todas las paradas marcadas como leídas?")){read.clear();save();render()}
+  if(confirm(acct.token?"¿Borrar todas las paradas marcadas como leídas, también en tu cuenta?":"¿Borrar todas las paradas marcadas como leídas?")){read.clear();save();render()}
 });
-buildChips();render();
+buildChips();render();renderAcct();if(acct.token)mergeOnLogin();
 </script>
 </body>
 </html>
