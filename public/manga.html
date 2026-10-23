@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Manga: las obras imprescindibles</title>
+<meta name="description" content="Los mangas imprescindibles por estanterías, con su longitud, su anime y sus ediciones en castellano.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F4EF; --ink:#17181C; --muted:#5B5E66; --line:#D5D7D0; --card:#FFFFFF;
+  --cyan:#0095C8; --magenta:#D1006F; --yellow:#F5D800;
+  --dot:rgba(23,24,28,.14);
+  --display:"Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --rail:var(--ink);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#15161A; --ink:#EDEDE8; --muted:#A3A6AD; --line:#2E3036; --card:#1E2025;
+    --cyan:#35B8E8; --magenta:#FF3D98; --yellow:#FFE23A; --dot:rgba(237,237,232,.12);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#15161A; --ink:#EDEDE8; --muted:#A3A6AD; --line:#2E3036; --card:#1E2025;
+  --cyan:#35B8E8; --magenta:#FF3D98; --yellow:#FFE23A; --dot:rgba(237,237,232,.12);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 120px)}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.55 var(--body);-webkit-text-size-adjust:100%}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:980px;margin:0 auto;padding:0 18px}
+.col{max-width:640px}
+
+header.hero{position:relative;padding:40px 0 28px;border-bottom:3px solid var(--ink);overflow:hidden}
+header.hero .wrap{position:relative}
+header.hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(var(--dot) 1.6px,transparent 1.7px);background-size:9px 9px;
+  -webkit-mask-image:linear-gradient(115deg,transparent 35%,#000 100%);mask-image:linear-gradient(115deg,transparent 35%,#000 100%);pointer-events:none}
+.sections{position:absolute;top:-26px;right:18px;z-index:1;display:flex;gap:6px}.sections a{border:2px solid var(--ink);border-radius:999px;padding:5px 12px;font:600 14px/1.2 var(--body);color:var(--ink);text-decoration:none;background:var(--card);white-space:nowrap}.sections a[aria-current]{background:var(--ink);color:var(--paper)}.sections a:not([aria-current]):hover{background:var(--ink);color:var(--paper)}.sections a:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+h1{font:900 clamp(2.6rem,9vw,5.2rem)/.9 var(--display);margin:12px 0 14px;letter-spacing:.005em;max-width:12ch;position:relative}
+.lede{max-width:62ch;color:var(--muted);margin:0 0 20px;position:relative}
+.progress{display:flex;align-items:center;gap:12px;position:relative;max-width:640px}
+.bar{flex:1;height:12px;background:var(--card);border:2px solid var(--ink);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--rail);transition:width .4s ease}
+.count{font:900 1.35rem/1 var(--display);white-space:nowrap}
+
+.controls{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);padding:8px 0 10px;border-bottom:1px solid var(--line)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:inline-flex;align-items:center;gap:7px;border:2px solid var(--line);background:transparent;color:var(--ink);font-size:.88rem;font-weight:500;padding:5px 11px;border-radius:999px}
+.chip .dot{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.chip[aria-pressed="true"]{background:var(--c,var(--ink));border-color:var(--c,var(--ink));color:var(--c-ink,#fff)}
+.chip[aria-pressed="true"]:not([style]){color:var(--paper)}
+.chip[aria-pressed="true"] .dot{background:#fff}
+.toggle{margin-top:8px;display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--muted)}
+.toggle input{width:18px;height:18px;accent-color:var(--ink)}
+.chip:focus-visible,.station:focus-visible,input:focus-visible,footer button:focus-visible,.acct button.link:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+
+.route{position:relative;margin-top:8px}
+.act{position:relative;padding:30px 0 6px 52px}
+.act::before{content:"";position:absolute;left:14px;top:0;bottom:0;width:6px;background:var(--rail);opacity:.18}
+.act h2{font:900 2.3rem/1 var(--display);margin:0}
+.act .era{color:var(--muted);font-size:14px;margin-top:4px}
+.act .node{position:absolute;left:3px;top:30px;width:28px;height:28px;border-radius:7px;
+  background:var(--rail);transform:rotate(45deg)}
+
+.stop{position:relative;padding:16px 0 16px 52px}
+.stop::before{content:"";position:absolute;left:14px;top:0;bottom:0;width:6px;background:var(--rail)}
+.stop.op::before{opacity:.35}
+.station{position:absolute;left:1px;top:16px;width:32px;height:32px;border-radius:50%;
+  border:5px solid var(--rail);background:var(--paper);cursor:pointer;padding:0;
+  display:grid;place-items:center;color:var(--paper)}
+.stop.op .station{border-style:dashed;border-width:3px;width:26px;height:26px;left:4px;top:19px}
+.station svg{width:16px;height:16px;opacity:0}
+.stop.read .station{background:var(--rail)}
+.stop.read .station svg{opacity:1}
+.num{font:700 .95rem/1.2 var(--display);letter-spacing:.02em;color:var(--muted)}
+.stop h3{margin:2px 0 0;font-size:1.15rem;line-height:1.25;font-weight:600}
+.stop.read h3{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--muted)}
+.by{color:var(--muted);font-size:14px;margin-top:2px}
+.why{margin:6px 0 0;max-width:36em}
+.tags{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:500}
+.tag i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.screen{margin-top:6px;font-size:14px;color:var(--muted)}
+.screen b{color:var(--ink);font-weight:600}
+.opt{font:600 .8rem/1 var(--body);color:var(--muted);margin-left:6px}
+.warn{margin-top:8px;font-size:14px;color:var(--magenta);font-weight:600}
+.ed{margin-top:10px;border-left:3px solid var(--line);padding:2px 0 2px 12px;font-size:14px}
+.ed.has-cover{display:flex;gap:12px;align-items:flex-start}
+.ed .cover{flex:none;width:64px;line-height:0}
+.ed .cover img{width:100%;height:auto;border-radius:2px;box-shadow:0 1px 3px rgba(0,0,0,.25);background:var(--line)}
+.ed-body{min-width:0;flex:1}
+.book .ed .cover{width:84px}
+.ed-h{color:var(--muted)}
+.ed-h b{color:var(--ink);font-weight:700}
+.ed ol{margin:4px 0 0;padding:0 0 0 18px}
+.ed li{margin:3px 0}
+.ed li.single{list-style:none;margin-left:-18px}
+.ed a{color:var(--ink);font-weight:600;text-underline-offset:3px}
+.ed .meta{color:var(--muted)}
+.ed .out{color:var(--magenta)}
+.after{margin-top:6px;font-size:14px;color:var(--muted)}
+.after b{color:var(--ink);font-weight:600}
+.act.branch::before,.stop.branch::before{background:repeating-linear-gradient(var(--rail) 0 10px,transparent 10px 18px);opacity:1}
+.act.branch .node{border-radius:50%;transform:none;background:var(--paper);border:6px solid var(--rail)}
+.lib{padding-bottom:10px}
+.shelf{padding:34px 0 4px}
+.shelf h2{font:900 2.3rem/1 var(--display);margin:0;display:flex;align-items:center;gap:12px}
+.shelf h2::before{content:"";width:14px;height:34px;background:var(--c);flex:none}
+.shelf .era{color:var(--muted);font-size:14px;margin:4px 0 0 26px}
+.books{display:grid;grid-template-columns:1fr;gap:14px;margin-top:16px}
+@media (min-width:760px){.books{grid-template-columns:1fr 1fr}}
+.book{position:relative;background:var(--card);border:2px solid var(--line);border-top:5px solid var(--c);padding:16px 16px 14px;scroll-margin-top:130px;transition:border-color .3s}
+.book.flash{border-color:var(--c)}
+.book .station{position:absolute;top:14px;right:14px;left:auto;width:30px;height:30px;border:3px solid var(--c);background:var(--card);color:var(--card)}
+.book.read .station{background:var(--c)}
+.book.read .station svg{opacity:1}
+.book h3{margin:0;padding-right:40px;font:900 1.7rem/1.05 var(--display)}
+.book.read h3{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--muted)}
+.start{display:inline-block;margin:0 0 6px;padding:2px 8px;background:var(--yellow);color:#17181C;font-size:.78rem;font-weight:600}
+.len{margin-top:6px;font-size:13px;color:var(--muted)}
+.len b{display:inline-block;padding:1px 7px;border-radius:999px;border:2px solid currentColor;font-size:12px;color:var(--ink)}
+.len-corta b{border-color:#16A34A}.len-media b{border-color:#CA8A04}.len-larga b{border-color:#DC2626}
+.next{margin-top:10px;font-size:14px;color:var(--muted)}
+.next a{color:var(--ink);font-weight:600;text-underline-offset:3px}
+.hidden{display:none}
+.empty{padding:30px 0 0;color:var(--muted)}
+
+footer{margin-top:40px;border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);font-size:.85rem}
+footer button{color:var(--ink);background:none;border:2px solid var(--line);border-radius:999px;padding:5px 12px;margin-top:10px}
+.acct{margin-top:16px;position:relative;max-width:640px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:14px;color:var(--muted)}
+.acct b{color:var(--ink);font-weight:600}
+.acct button.link{color:var(--ink);background:none;border:2px solid var(--line);border-radius:999px;padding:5px 11px}
+#gbtn{min-height:40px}
+@media (max-width:640px){header.hero{padding:26px 0 20px}.sections a{font-size:13px;padding:4px 10px}}
+@media (prefers-reduced-motion: reduce){.bar i{transition:none}}
+
+@media (max-width:820px){.sections{position:static;justify-content:flex-end;flex-wrap:wrap;gap:4px;margin:0 0 16px}header.hero h1{margin-top:0}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <nav class="sections" aria-label="Secciones"><a href="/">Películas</a><a href="/comics">Marvel</a><a href="/dc">DC</a><a href="/novelas">Novelas</a><a href="/manga" aria-current="page">Manga</a></nav>
+    <h1>Manga</h1>
+    <p class="lede">Los mangas imprescindibles, ordenados por estanterías. Cada obra indica cuántos tomos tiene, para saber a qué te comprometes, y con qué anime conecta. Empieza por las marcadas: casi todas son cortas o están cerradas.</p>
+    <div class="progress"><div class="bar"><i id="bar"></i></div><span class="count" id="count">0 de 0 leídos</span></div>
+    <div class="acct" id="acct" aria-live="polite"></div>
+  </div>
+</header>
+
+<div class="controls"><div class="wrap">
+    <div class="chips" id="chips" role="group" aria-label="Filtrar por estantería"></div>
+    <label class="toggle"><input type="checkbox" id="core"> Solo por dónde empezar</label>
+</div></div>
+
+<div class="wrap"><main class="lib" id="route"></main></div>
+
+<footer><div class="wrap">
+    Las marcadas con "Empieza por aquí" son la mejor puerta de entrada a cada estantería.<br>
+    Los años indican cuándo se publicó cada obra.<br>
+    <button id="reset" type="button">Borrar mi progreso</button><br><br>
+    <a href="/privacidad" style="color:inherit">Privacidad</a> · <a href="/condiciones" style="color:inherit">Condiciones</a> · Guía personal, sin afiliación con las editoriales citadas.
+</div></footer>
+
+<script>
+const SHELVES = [
+ {id:"aventura",t:"Aventura y fantasía",e:"Viajes, poderes y mundos por descubrir",c:"#EA580C",s:[
+  {id:"fma",t:"Fullmetal Alchemist",b:"Hiromu Arakawa · 2001–10",w:"Dos hermanos pagan un precio terrible por intentar resucitar a su madre con alquimia. Aventura, guerra y un final perfecto.",st:1,nx:["hxh","frieren"]},
+  {id:"dragonball",t:"Dragon Ball",b:"Akira Toriyama · 1984–95",w:"Goku, de niño salvaje a guerrero más fuerte del universo. El manga que lo cambió todo, con mucho humor al principio.",st:1,nx:["onepiece","hxh"]},
+  {id:"frieren",t:"Frieren",b:"Yamada y Abe · 2020–",w:"Una elfa sobrevive siglos a sus compañeros de aventura y aprende tarde lo que significaban para ella. Fantasía tranquila y emocionante.",nx:["mushishi","fma"]},
+  {id:"hxh",t:"Hunter x Hunter",b:"Yoshihiro Togashi · 1998–",w:"Un niño busca a su padre y se mete en un mundo de cazadores. Los combates más ingeniosos del género.",nx:["fma","titanes"]},
+  {id:"onepiece",t:"One Piece",b:"Eiichiro Oda · 1997–",w:"Luffy quiere ser el rey de los piratas. Una aventura enorme, divertida y emotiva que lleva casi treinta años.",nx:["dragonball","vinland"]},
+  {id:"mushishi",t:"Mushishi",b:"Yuki Urushibara · 1999–2008",w:"Un viajero estudia criaturas misteriosas en un Japón rural. Historias cortas, calmadas y preciosas.",nx:["frieren","barrio"]}
+ ]},
+ {id:"thriller",t:"Thriller y misterio",e:"Para no poder parar de leer",c:"#475569",s:[
+  {id:"monster",t:"Monster",b:"Naoki Urasawa · 1994–2001",w:"Un cirujano salva la vida a un niño que crecerá para ser un asesino. Thriller europeo de primer nivel.",st:1,nx:["20cb","pluto"]},
+  {id:"deathnote",t:"Death Note",b:"Ohba y Obata · 2003–06",w:"Un estudiante encuentra un cuaderno que mata a quien escriba en él. Duelo de mentes entre él y un detective excéntrico.",st:1,nx:["monster","parasyte"]},
+  {id:"20cb",t:"20th Century Boys",b:"Naoki Urasawa · 1999–2006",w:"Un grupo de amigos descubre que una secta cumple el apocalipsis que inventaron de niños.",nx:["monster","akira"]},
+  {id:"titanes",t:"Ataque a los titanes",b:"Hajime Isayama · 2009–21",w:"La humanidad vive tras murallas para protegerse de gigantes devoradores. Cambia por completo a mitad de camino.",nx:["vinland","chainsaw"]}
+ ]},
+ {id:"cifi",t:"Ciencia ficción",e:"Futuros, máquinas y espacio",c:"#0284C7",s:[
+  {id:"akira",t:"Akira",b:"Katsuhiro Otomo · 1982–90",w:"Neo-Tokio, bandas de moteros y un poder capaz de destruir la ciudad. Uno de los cómics más influyentes de la historia.",st:1,nx:["gits","20cb"]},
+  {id:"pluto",t:"Pluto",b:"Naoki Urasawa · 2003–09",w:"Alguien asesina a los robots más avanzados del mundo. Una historia de Astroboy de Tezuka convertida en thriller adulto.",st:1,nx:["monster","gits"]},
+  {id:"nausicaa",t:"Nausicaä del Valle del Viento",b:"Hayao Miyazaki · 1982–94",w:"La obra maestra en papel del director de Ghibli: guerra, ecología y una princesa que se niega a odiar.",nx:["planetes","mushishi"]},
+  {id:"gits",t:"Ghost in the Shell",b:"Masamune Shirow · 1989–91",w:"Una agente con cuerpo artificial persigue a un hacker en un futuro conectado. Base de todo el ciberpunk posterior.",nx:["akira","pluto"]},
+  {id:"planetes",t:"Planetes",b:"Makoto Yukimura · 1999–2004",w:"Recogedores de basura espacial en órbita. Ciencia ficción realista y muy humana del autor de Vinland Saga.",nx:["vinland","nausicaa"]}
+ ]},
+ {id:"epica",t:"Épica y samuráis",e:"Espadas, guerreros y venganza",c:"#B45309",s:[
+  {id:"vinland",t:"Vinland Saga",b:"Makoto Yukimura · 2005–25",w:"Un joven vikingo vive para vengarse y acaba buscando una vida sin guerra. De historia de acción a historia sobre la paz.",st:1,nx:["vagabond","planetes"]},
+  {id:"vagabond",t:"Vagabond",b:"Takehiko Inoue · 1998–",w:"La vida de Miyamoto Musashi, el espadachín más famoso de Japón. Dibujo de otro planeta.",st:1,nx:["lobo","slamdunk"]},
+  {id:"berserk",t:"Berserk",b:"Kentaro Miura · 1989–",w:"Guts, un mercenario marcado, contra un mundo de demonios. Fantasía oscura y brutal; su arco de La Edad de Oro es legendario.",nx:["espada","devilman"]},
+  {id:"lobo",t:"El lobo solitario y su cachorro",b:"Koike y Kojima · 1970–76",w:"Un verdugo caído en desgracia recorre Japón con su hijo pequeño, como asesino a sueldo. El clásico del género.",nx:["vagabond","espada"]},
+  {id:"espada",t:"La espada del inmortal",b:"Hiroaki Samura · 1993–2012",w:"Un samurái que no puede morir protege a una chica que busca venganza. Combates salvajes y un dibujo único.",nx:["berserk","lobo"]}
+ ]},
+ {id:"terror",t:"Terror",e:"Para leer con la luz encendida",c:"#B91C1C",s:[
+  {id:"uzumaki",t:"Uzumaki",b:"Junji Ito · 1998–99",w:"Un pueblo obsesionado con las espirales. El maestro del terror japonés en su obra más perturbadora.",st:1,nx:["parasyte","devilman"]},
+  {id:"parasyte",t:"Parasyte",b:"Hitoshi Iwaaki · 1988–95",w:"Un parásito alienígena se instala en la mano de un estudiante. Terror, acción y preguntas sobre qué nos hace humanos.",st:1,nx:["deathnote","chainsaw"]},
+  {id:"devilman",t:"Devilman",b:"Go Nagai · 1972–73",w:"Un chico se fusiona con un demonio para combatirlos. Apocalíptica y mucho más dura de lo que parece.",nx:["chainsaw","berserk"]},
+  {id:"chainsaw",t:"Chainsaw Man",b:"Tatsuki Fujimoto · 2018–26",w:"Un chico pobre se convierte en motosierra viviente para cazar demonios. Caótica, gamberra y sorprendentemente triste.",nx:["devilman","titanes"]}
+ ]},
+ {id:"drama",t:"Drama, historia y vida",e:"Crecer, recordar y sobrevivir",c:"#DB2777",s:[
+  {id:"barrio",t:"Barrio lejano",b:"Jiro Taniguchi · 1998",w:"Un hombre de 48 años despierta en su cuerpo de 14 y revive el verano en que su padre se marchó.",st:1,nx:["solanin","mushishi"]},
+  {id:"voz",t:"Una voz silenciosa",b:"Yoshitoki Oima · 2013–14",w:"Un chico que acosó a una compañera sorda intenta, años después, pedirle perdón. Sobre la culpa y la amistad.",st:1,nx:["punpun","solanin"]},
+  {id:"adolf",t:"Adolf",b:"Osamu Tezuka · 1983–85",w:"Tres Adolf, un secreto sobre Hitler y la Segunda Guerra Mundial vista desde Japón. Tezuka, el padre del manga, en su obra adulta.",st:1,nx:["gen","pluto"]},
+  {id:"slamdunk",t:"Slam Dunk",b:"Takehiko Inoue · 1990–96",w:"Un gamberro se apunta a baloncesto para ligar y descubre una pasión. El mejor manga de deportes.",nx:["vagabond","dragonball"]},
+  {id:"punpun",t:"Buenas noches, Punpun",b:"Inio Asano · 2007–13",w:"La vida de un chico dibujado como un pájaro, de la infancia a la edad adulta. Dura y difícil de olvidar.",nx:["solanin","voz"]},
+  {id:"solanin",t:"Solanin",b:"Inio Asano · 2005–06",w:"Veinteañeros en Tokio que no saben qué hacer con sus vidas, y una canción. Lo más amable de Asano.",nx:["barrio","punpun"]},
+  {id:"gen",t:"Gen descalzo",b:"Keiji Nakazawa · 1973–85",w:"Un niño sobrevive a la bomba de Hiroshima. Basado en lo que vivió el autor.",nx:["adolf","barrio"]}
+ ]}
+];
+
+// Ediciones en castellano: c = colección; t = tomos {n: título, i: números USA, p: precio, u: enlace verificado, a: 0 si agotado}
+const PAGE="manga";
+const COVERS = {};
+const EDS = {"dragonball":{"c":"Planeta Cómic, Ultimate","t":[{"n":"Dragon Ball Ultimate n.º 01/34","p":"12,95 €","u":"https://www.planetadelibros.com/libro-dragon-ball-ultimate-n-0134/324731"}],"n":34,"an":"Dragon Ball y Dragon Ball Z"},"fma":{"c":"Norma Editorial, Kanzenban","t":[{"n":"Fullmetal Alchemist Kanzenban 01","p":"15,95 €","u":"https://www.normaeditorial.com/ficha/manga/fullmetal-alchemist-kanzenban/fullmetal-alchemist-kanzenban-01"}],"n":18,"an":"Fullmetal Alchemist: Brotherhood, la versión fiel al manga"},"onepiece":{"c":"Planeta Cómic, 3 en 1","t":[{"n":"One Piece n.º 01 (3 en 1)","p":"16,95 €","u":"https://www.planetadelibros.com/libro-one-piece-n-01-3-en-1/367693"}],"n":113,"open":1,"an":"One Piece, anime y serie de Netflix","note":"Cada tomo 3 en 1 junta tres normales; esta edición va por el 15. La normal, por el 113."},"hxh":{"c":"Panini Manga","t":[{"n":"Hunter x Hunter 1","p":"8,95 €","u":"https://www.panini.es/shp_esp_es/hunter-x-hunter-1-shuhu001y-es01.html"}],"n":38,"open":1,"an":"Hunter x Hunter (2011)","note":"Su autor la interrumpe durante años; no tiene final."},"frieren":{"c":"Norma Editorial","t":[{"n":"Frieren 1","p":"9,00 €","u":"https://www.normaeditorial.com/ficha/manga/frieren/frieren-1"}],"n":15,"open":1,"an":"Frieren, dos temporadas"},"mushishi":{"c":"Segunda mano","t":[{"n":"Mushi-shi 01 (Norma, 2007)","u":"https://www.todostuslibros.com/libros/mushi-shi-01_978-84-9847-075-8","a":0}],"n":10,"an":"Mushishi, dos temporadas","note":"Solo hay la edición de Norma de 2007, agotada: buscarla de segunda mano."},"monster":{"c":"Planeta Cómic, Kanzenban","t":[{"n":"Monster Kanzenban n.º 01/09","p":"16,95 €","u":"https://www.planetadelibros.com/libro-monster-kanzenban-n-0109/57393"}],"n":9,"an":"Monster (2004), muy fiel"},"deathnote":{"c":"Norma Editorial, Black Edition","t":[{"n":"Death Note. Black Edition 1","p":"18,95 €","u":"https://www.normaeditorial.com/ficha/manga/death-note/death-note-black-edition/death-note-black-edition-1"}],"n":6,"an":"Death Note (2006)"},"20cb":{"c":"Planeta Cómic, Kanzenban","t":[{"n":"20th Century Boys n.º 01/11","p":"16,95 €","u":"https://www.planetadelibros.com/libro-20th-century-boys-n-0111/251131"}],"n":11,"note":"El final está en un tomo aparte, 21st Century Boys."},"titanes":{"c":"Norma Editorial, Edición Coleccionista","t":[{"n":"Ataque a los titanes. Edición Coleccionista 1","p":"24,50 €","u":"https://www.normaeditorial.com/ficha/manga/ataque-a-los-titanes/ataque-a-los-titanes-integral/ataque-a-los-titanes-integral-1"}],"n":12,"an":"Ataque a los titanes (2013-23)","note":"En rústica son 34 tomos."},"akira":{"c":"Norma Editorial","t":[{"n":"Akira. Edición original 1","p":"19,95 €","u":"https://www.todostuslibros.com/libros/akira-edicion-original-1_978-84-679-3256-0"}],"n":6,"an":"Akira, película de 1988","note":"En blanco y negro, como se publicó en Japón."},"pluto":{"c":"Planeta Cómic","t":[{"n":"Pluto n.º 01/08","p":"9,50 €","u":"https://www.planetadelibros.com/libro-pluto-n-0108/239123"}],"n":8,"an":"Pluto (Netflix)"},"nausicaa":{"c":"Planeta Cómic","t":[{"n":"Nausicaä n.º 01","p":"12,95 €","u":"https://www.todostuslibros.com/libros/nausicaa-no-01_978-84-1161-833-5"}],"n":7,"an":"Nausicaä del Valle del Viento, película de Ghibli","note":"La película solo adapta el principio."},"gits":{"c":"Planeta Cómic","t":[{"n":"Ghost in the Shell","p":"19,95 €","u":"https://www.planetadelibros.com/libro-ghost-in-the-shell-trazado/92831"}],"n":3,"an":"Ghost in the Shell, película de 1995","note":"El primero se lee solo; los otros dos son continuaciones. Queda poco stock."},"planetes":{"c":"Panini Manga","t":[{"n":"Planetes (integral)","p":"50,00 €","u":"https://www.todostuslibros.com/libros/reprint-planetes-integral_979-13-7013-033-6"}],"n":1,"an":"Planetes, serie de 2003"},"vagabond":{"c":"Ivrea","t":[{"n":"Vagabond 01","p":"8,00 €","u":"https://www.todostuslibros.com/libros/vagabond-01_978-84-15922-94-0"}],"n":37,"open":1,"note":"En pausa desde 2015 sin final; aun así, de lo mejor del manga."},"vinland":{"c":"Planeta Cómic","t":[{"n":"Vinland Saga n.º 01","p":"12,95 €","u":"https://www.planetadelibros.com/libro-vinland-saga-n-01/162006"}],"n":29,"an":"Vinland Saga, dos temporadas"},"berserk":{"c":"Panini Manga","t":[{"n":"Maximum Berserk 1","p":"16,95 €","u":"https://www.todostuslibros.com/libros/reprint-maximum-berserk-n-1_978-84-1101-503-5"}],"n":21,"open":1,"an":"Berserk, serie de 1997 y películas de La Edad de Oro","note":"Cada Maximum junta dos tomos japoneses. Sigue en curso tras la muerte de Miura."},"lobo":{"c":"Planeta Cómic","t":[{"n":"Lobo solitario y su cachorro n.º 01/20","p":"15,95 €","u":"https://www.todostuslibros.com/libros/lobo-solitario-y-su-cachorro-no-01-20_978-84-16693-17-7"}],"n":20,"note":"Adaptada en seis películas de imagen real en los setenta."},"espada":{"c":"Planeta Cómic","t":[{"n":"La espada del inmortal Kanzenban n.º 01/15","p":"17,95 €","u":"https://www.planetadelibros.com/libro-la-espada-del-inmortal-kanzenban-n-0115/251127"}],"n":15,"an":"Blade of the Immortal, anime de 2019"},"uzumaki":{"c":"Planeta Cómic","t":[{"n":"Uzumaki (integral)","p":"26,95 €","u":"https://www.planetadelibros.com/libro-uzumaki-integral/251132"}],"n":1,"an":"Uzumaki, miniserie anime (2024)"},"parasyte":{"c":"Planeta Cómic","t":[{"n":"Parasyte n.º 01/08","p":"10,50 €","u":"https://www.planetadelibros.com/libro-parasyte-n-0108/214161"}],"n":8,"an":"Parasyte: The Maxim (2014)"},"devilman":{"c":"MangaLine","t":[{"n":"Devilman 1","p":"32,95 €","u":"https://mangaline.es/product/devilman-1/"}],"n":3,"an":"Devilman Crybaby (Netflix)","note":"Edición nueva en tomos gruesos; va por el 2."},"chainsaw":{"c":"Norma Editorial","t":[{"n":"Chainsaw Man 1","p":"9,00 €","u":"https://www.todostuslibros.com/libros/chainsaw-man-1_978-84-679-4115-9"}],"n":24,"an":"Chainsaw Man y la película Reze","note":"Terminó en Japón con 24 tomos; Norma va por el 23."},"barrio":{"c":"Ponent Mon","t":[{"n":"Barrio lejano (integral)","p":"24,00 €","u":"https://www.todostuslibros.com/libros/barrio-lejano_978-1-910856-16-1"}],"n":1},"voz":{"c":"Segunda mano","t":[{"n":"Koe no Katachi. Una voz silenciosa 1 (Ivrea)","u":"https://www.todostuslibros.com/libros/koe-no-katachi-una-voz-silenciosa-1_978-84-17179-97-7","a":0}],"n":7,"an":"A Silent Voice, película","note":"Solo hay la edición importada de Ivrea, ahora agotada: buscarla de segunda mano. La película es una gran alternativa."},"adolf":{"c":"Planeta Cómic","t":[{"n":"Adolf (estuche con 2 tomos)","p":"60,00 €","u":"https://www.planetadelibros.com/libro-adolf-tezuka/361332"}],"n":2,"note":"También en 5 tomos sueltos, más baratos."},"gen":{"c":"Distrito Manga","t":[{"n":"Pies descalzos 1","p":"24,95 €","u":"https://www.todostuslibros.com/libros/pies-descalzos-1-shonen_978-84-19290-28-1"}],"n":4,"an":"Gen descalzo, películas de 1983 y 1986","note":"En esta edición se titula Pies descalzos."},"punpun":{"c":"Norma Editorial","t":[{"n":"Buenas noches, Punpun 01","p":"10,95 €","u":"https://www.todostuslibros.com/libros/buenas-noches-punpun-01-cambio-pvp_978-84-679-6278-9"}],"n":13},"solanin":{"c":"Norma Editorial","t":[{"n":"Solanin (integral)","p":"17,95 €","u":"https://www.todostuslibros.com/libros/solanin-nuevo-pvp_978-84-679-6312-0"}],"n":1,"an":"Solanin, película"},"slamdunk":{"c":"Ivrea","t":[{"n":"Slam Dunk New Edition 01","p":"15,00 €","u":"https://www.todostuslibros.com/libros/slam-dunk-new-edition-n-01_978-84-19531-56-8"}],"n":20,"an":"Slam Dunk y la película The First Slam Dunk"}};
+
+const KEY="manga.leidos";
+const API_PATH="/rutas/manga";
+let read=new Set();
+try{const v=localStorage.getItem(KEY);if(v)read=new Set(JSON.parse(v))}catch(e){}
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify([...read]))}catch(e){}}
+function save(){saveLocal();saveRemote()}
+
+// --- Cuenta compartida con la guía (misma sesión de Google) ---
+const SESSION_KEY="marvel.session";
+const GOOGLE_CLIENT_ID="965357339286-prasf832d5odh57em5nmgrhc1kmoqn48.apps.googleusercontent.com";
+const acct={token:null,email:null,name:"",status:"idle",remoteAt:0,timer:null,dirty:false,lastSync:0};
+function loadSession(){acct.token=null;acct.email=null;acct.name="";
+  try{const s=JSON.parse(localStorage.getItem(SESSION_KEY)||"null");if(s&&s.token&&s.email){acct.token=s.token;acct.email=s.email;acct.name=s.name||""}}catch(e){}}
+function saveSession(){try{acct.token?localStorage.setItem(SESSION_KEY,JSON.stringify({token:acct.token,email:acct.email,name:acct.name})):localStorage.removeItem(SESSION_KEY)}catch(e){}}
+loadSession();
+async function api(method,path,body){
+  const headers={};
+  if(body!==undefined)headers["content-type"]="application/json";
+  if(acct.token)headers["authorization"]="Bearer "+acct.token;
+  let res;
+  try{res=await fetch("/api"+path,{method,headers,body:body!==undefined?JSON.stringify(body):undefined})}
+  catch(e){throw {code:"network",message:"Sin conexión con el servidor."}}
+  let data={};try{data=await res.json()}catch(e){}
+  if(!res.ok){
+    if(res.status===401&&acct.token&&path!=="/google"){endSession(false)}
+    throw {code:data.error||"http_"+res.status,message:data.message||"Error "+res.status};
+  }
+  return data;
+}
+function setStatus(s){acct.status=s;renderAcct()}
+async function pushRemote(){
+  if(!acct.token)return;
+  clearTimeout(acct.timer);acct.timer=null;setStatus("syncing");
+  try{const r=await api("PUT",API_PATH,{read:[...read]});acct.dirty=false;acct.remoteAt=r.updated_at;acct.lastSync=Date.now();setStatus("ok")}
+  catch(e){if(acct.token)setStatus("error")}
+}
+function saveRemote(){if(!acct.token)return;acct.dirty=true;clearTimeout(acct.timer);acct.timer=setTimeout(pushRemote,800)}
+function applyRemote(list){read=new Set(list||[]);saveLocal();if(typeof render==="function")render()}
+async function mergeOnLogin(){
+  setStatus("syncing");
+  try{
+    const r=await api("GET",API_PATH);
+    const before=r.read.length,merged=new Set(r.read);read.forEach(k=>merged.add(k));
+    acct.remoteAt=r.updated_at;applyRemote([...merged]);
+    if(merged.size!==before)await pushRemote();else{acct.lastSync=Date.now();setStatus("ok")}
+  }catch(e){if(acct.token)setStatus("error")}
+}
+async function refreshFromServer(){
+  if(!acct.token)return;
+  if(acct.dirty){await pushRemote();return}
+  try{const r=await api("GET",API_PATH);if(r.updated_at>acct.remoteAt){acct.remoteAt=r.updated_at;applyRemote(r.read)}acct.lastSync=Date.now();setStatus("ok")}
+  catch(e){if(acct.token)setStatus("error")}
+}
+function endSession(callServer){
+  if(callServer&&acct.token){fetch("/api/logout",{method:"POST",headers:{authorization:"Bearer "+acct.token}}).catch(()=>{})}
+  acct.token=null;acct.email=null;acct.name="";acct.remoteAt=0;acct.dirty=false;acct.lastSync=0;clearTimeout(acct.timer);
+  saveSession();
+  try{if(window.google&&google.accounts)google.accounts.id.disableAutoSelect()}catch(e){}
+  // En un equipo compartido, lo marcado no debe quedar a la vista del siguiente.
+  try{["marvel.watched","rutaMarvel.leidos","rutaDC.leidos","biblioteca.leidos"].forEach(k=>localStorage.removeItem(k))}catch(e){}
+  applyRemote([]);renderAcct();
+}
+let gisState="idle";
+function loadGis(){
+  if(gisState!=="idle")return;gisState="loading";
+  const s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";s.async=true;
+  s.onload=()=>{try{google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:onGoogleCredential,auto_select:false,cancel_on_tap_outside:true,use_fedcm_for_button:true,context:"signin",ux_mode:"popup"});gisState="ready"}catch(e){gisState="error"}renderAcct()};
+  s.onerror=()=>{gisState="error";renderAcct()};
+  document.head.append(s);
+}
+async function onGoogleCredential(resp){
+  try{
+    const r=await api("POST","/google",{credential:resp.credential});
+    acct.token=r.token;acct.email=r.email;acct.name=r.name||"";saveSession();renderAcct();
+    await mergeOnLogin();
+  }catch(e){alert(e.message||"No se ha podido iniciar sesión.")}
+}
+function statusText(){
+  if(acct.status==="syncing")return "Guardando…";
+  if(acct.status==="error")return "Sin conexión: se guardará al volver";
+  if(acct.lastSync){const t=new Date(acct.lastSync);return "Guardado "+String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0")}
+  return "";
+}
+function renderAcct(){
+  const box=document.getElementById("acct");if(!box)return;
+  box.textContent="";
+  if(acct.token){
+    const who=document.createElement("span");who.innerHTML="Con tu cuenta: <b></b>";who.querySelector("b").textContent=acct.name||acct.email;
+    const st=document.createElement("span");st.textContent=statusText();
+    const out=document.createElement("button");out.className="link";out.type="button";out.textContent="Cerrar sesión";
+    out.onclick=()=>endSession(true);
+    box.append(who,st,out);
+  }else{
+    const p=document.createElement("span");p.textContent="Tu progreso se guarda en este navegador. Entra con Google para tenerlo en todos tus dispositivos.";
+    const g=document.createElement("div");g.id="gbtn";
+    box.append(p,g);
+    if(gisState==="ready"){try{google.accounts.id.renderButton(g,{type:"standard",theme:"outline",size:"medium",text:"continue_with",shape:"pill",locale:"es"})}catch(e){}}
+    else if(gisState==="error"){g.textContent="No se ha podido cargar el acceso con Google."}
+    else loadGis();
+  }
+}
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"){
+    // Puede haber entrado o salido desde la guía en otra pestaña.
+    const had=acct.token;loadSession();
+    if(acct.token&&acct.token!==had){mergeOnLogin()}else if(!acct.token&&had){acct.lastSync=0;renderAcct()}else refreshFromServer();
+    renderAcct();
+  }else if(acct.dirty)pushRemote();
+});
+
+let filter=null, coreOnly=false;
+const route=document.getElementById("route");
+const check='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+function edHtml(s){
+  const e=EDS[s.id];if(!e||!e.t||!e.t.length)return "";
+  const n=e.t.length;
+  const head=`<div class="ed-h">En castellano · ${esc(e.c)}</div>`;
+  const items=e.t.map(t=>{
+    const name=t.u?`<a href="${esc(t.u)}" target="_blank" rel="noopener">${esc(t.n)}</a>`:`<span>${esc(t.n)}</span>`;
+    const meta=[t.i,t.p].filter(Boolean).map(esc).join(" · ");
+    const out=t.u&&t.a===0?` <span class="out">agotado</span>`:"";
+    return `<li${n===1?' class="single"':""}>${e.n>1?"Empieza con ":""}${name}${meta?` <span class="meta">(${meta})</span>`:""}${out}</li>`;
+  }).join("");
+  const alt=e.alt?`<div class="meta">Otra edición: <a href="${esc(e.alt.u)}" target="_blank" rel="noopener">${esc(e.alt.n)}</a></div>`:"";
+  const cv=COVERS[s.id],cu=(e.t.find(t=>t.u)||{}).u||(e.alt&&e.alt.u);
+  const cover=cv?(cu?`<a class="cover" href="${esc(cu)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">`:`<span class="cover" aria-hidden="true">`)+`<img src="/portadas/${PAGE}/${s.id}.webp" width="${cv[0]}" height="${cv[1]}" alt="" loading="lazy" decoding="async">`+(cu?"</a>":"</span>"):"";
+  return `<div class="ed${cover?" has-cover":""}">${cover}<div class="ed-body">${head}<ol>${items}</ol>${e.note?`<div class="meta">${esc(e.note)}</div>`:""}${alt}</div></div>`;
+}
+function lenHtml(b){
+  const e=EDS[b.id];if(!e||!e.n)return "";
+  const n=e.n,k=n<=10?"Corta":n<=30?"Media":"Larga";
+  return `<div class="len len-${k.toLowerCase()}"><b>${k}</b> · ${n===1?"tomo único":n+" tomos"}${e.open?", sin terminar":""}</div>`;
+}
+const ALL=SHELVES.flatMap(sh=>sh.s.map(b=>(b.sh=sh,b)));
+const BY=Object.fromEntries(ALL.map(b=>[b.id,b]));
+function render(){
+  let html="";
+  SHELVES.forEach(sh=>{
+    if(filter&&filter!==sh.id)return;
+    const books=sh.s.filter(b=>!coreOnly||b.st);
+    if(!books.length)return;
+    html+=`<section class="shelf" style="--c:${sh.c}"><h2>${esc(sh.t)}</h2><div class="era">${esc(sh.e)}</div><div class="books">`;
+    books.forEach(b=>{
+      const r=read.has(b.id);
+      html+=`<article class="book${r?" read":""}" id="b-${b.id}">
+        <button class="station" data-id="${b.id}" aria-pressed="${r}" aria-label="Marcar ${esc(b.t)} como leída">${check}</button>
+        ${b.st?'<div class="start">Empieza por aquí</div>':""}
+        <h3>${esc(b.t)}</h3>
+        <div class="by">${esc(b.b)}</div>
+        ${lenHtml(b)}
+        <p class="why">${esc(b.w)}</p>
+        ${EDS[b.id]&&EDS[b.id].an?`<div class="screen">Si viste: <b>${esc(EDS[b.id].an)}</b></div>`:""}
+        ${edHtml(b)}
+        <div class="next">Si te gustó, sigue con: ${b.nx.map(id=>`<a href="#b-${id}" data-go="${id}">${esc(BY[id].t)}</a>`).join(" · ")}</div>
+      </article>`;
+    });
+    html+=`</div></section>`;
+  });
+  route.innerHTML=html||`<p class="empty">No hay obras con este filtro.</p>`;
+  updateProgress();
+}
+
+function updateProgress(){
+  const all=ALL.filter(b=>!coreOnly||b.st);
+  const done=all.filter(b=>read.has(b.id)).length;
+  document.getElementById("count").textContent=`${done} de ${all.length} leídas`;
+  document.getElementById("bar").style.width=(all.length?done/all.length*100:0)+"%";
+}
+
+route.addEventListener("click",e=>{
+  const go=e.target.closest("[data-go]");
+  if(go){
+    e.preventDefault();
+    const id=go.dataset.go;
+    if((filter&&filter!==BY[id].sh.id)||(coreOnly&&!BY[id].st)){filter=null;coreOnly=false;document.getElementById("core").checked=false;buildChips();render()}
+    const el=document.getElementById("b-"+id);
+    if(el){el.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1600)}
+    return;
+  }
+  const b=e.target.closest(".station");if(!b)return;
+  const id=b.dataset.id;
+  read.has(id)?read.delete(id):read.add(id);
+  save();
+  const art=b.closest(".book");art.classList.toggle("read",read.has(id));
+  b.setAttribute("aria-pressed",read.has(id));
+  updateProgress();
+});
+
+const chips=document.getElementById("chips");
+function chip(key,label,color){
+  const b=document.createElement("button");
+  b.className="chip";b.type="button";
+  b.setAttribute("aria-pressed",String(filter===key));
+  if(color)b.style.setProperty("--c",color);
+  b.innerHTML=(color?'<span class="dot"></span>':"")+esc(label);
+  b.onclick=()=>{filter=key;buildChips();render()};
+  return b;
+}
+function buildChips(){
+  chips.innerHTML="";
+  chips.appendChild(chip(null,"Todas",null));
+  SHELVES.forEach(sh=>chips.appendChild(chip(sh.id,sh.t,sh.c)));
+}
+document.getElementById("core").addEventListener("change",e=>{coreOnly=e.target.checked;render()});
+document.getElementById("reset").addEventListener("click",()=>{
+  if(confirm(acct.token?"¿Borrar todas las obras marcadas como leídas, también en tu cuenta?":"¿Borrar todas las obras marcadas como leídas?")){read.clear();save();render()}
+});
+buildChips();render();renderAcct();if(acct.token)mergeOnLogin();
+</script>
+</body>
+</html>

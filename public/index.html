@@ -183,7 +183,7 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
   .detail{grid-template-columns:1fr}
   .jump{display:none}
   header.hero{padding:26px 0 20px}
-  .sections a{font-size:12px;padding:4px 8px}
+  .sections a{font-size:13px;padding:4px 10px}
   
 }
 
@@ -219,7 +219,7 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
 <body>
 <header class="hero">
   <div class="wrap">
-    <nav class="sections" aria-label="Secciones"><a href="/" aria-current="page">Películas</a><a href="/comics">Cómics Marvel</a><a href="/dc">Cómics DC</a><a href="/novelas">Novelas</a></nav>
+    <nav class="sections" aria-label="Secciones"><a href="/" aria-current="page">Películas</a><a href="/comics">Marvel</a><a href="/dc">DC</a><a href="/novelas">Novelas</a><a href="/manga">Manga</a></nav>
     <h1 id="top">Marvel en pantalla, contra el cómic</h1>
     <p class="lede">Más de cien películas y series comparadas con los arcos que adaptan: cuánto respetan, qué cambian y si merece la pena verlas. Los porcentajes son una estimación personal y están aquí para discutirse.</p>
     <div class="tally" id="tally"></div>
@@ -752,7 +752,7 @@ function endSession(callServer){
   saveSession();
   try{if(window.google&&google.accounts)google.accounts.id.disableAutoSelect();}catch(e){}
   // En un equipo compartido, lo marcado no debe quedar a la vista del siguiente.
-  watched.clear();saveLocal();try{["rutaMarvel.leidos","rutaDC.leidos","biblioteca.leidos"].forEach(k=>localStorage.removeItem(k));}catch(e){}render();
+  watched.clear();saveLocal();try{["rutaMarvel.leidos","rutaDC.leidos","biblioteca.leidos","manga.leidos"].forEach(k=>localStorage.removeItem(k));}catch(e){}render();
 }
 // --- Inicio de sesión con Google (Google Identity Services) ---
 const GOOGLE_CLIENT_ID="965357339286-prasf832d5odh57em5nmgrhc1kmoqn48.apps.googleusercontent.com";
