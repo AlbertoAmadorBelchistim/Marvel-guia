@@ -7,63 +7,65 @@
 <meta name="description" content="Los mejores cómics de Marvel en orden narrativo, con progreso de lectura y su conexión con el UCM.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
+  --paper:#F3F4EF; --ink:#17181C; --muted:#5B5E66; --line:#D5D7D0; --card:#FFFFFF;
+  --cyan:#0095C8; --magenta:#D1006F; --yellow:#F5D800;
+  --dot:rgba(23,24,28,.14);
+  --display:"Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --rail:var(--ink);
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
-  --paper:#FAFAF7; --ink:#1C2340; --muted:#5B6275; --hair:#D9DBE3; --soft:#EEF0F5;
-  --gift:#FFE14D; --gift-ink:#1C2340; --warn:#B42318;
-  --rail:var(--ink);
 }
-@media (prefers-color-scheme: dark){
+@media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --paper:#12152A; --ink:#ECEEF6; --muted:#A3A9BD; --hair:#2C3150; --soft:#1C2140;
-    --gift:#FFE14D; --gift-ink:#12152A; --warn:#FF8A7A;
+    --paper:#15161A; --ink:#EDEDE8; --muted:#A3A6AD; --line:#2E3036; --card:#1E2025;
+    --cyan:#35B8E8; --magenta:#FF3D98; --yellow:#FFE23A; --dot:rgba(237,237,232,.12);
   }
 }
 :root[data-theme="dark"]{
-  --paper:#12152A; --ink:#ECEEF6; --muted:#A3A9BD; --hair:#2C3150; --soft:#1C2140;
-  --gift:#FFE14D; --gift-ink:#12152A; --warn:#FF8A7A;
+  --paper:#15161A; --ink:#EDEDE8; --muted:#A3A6AD; --line:#2E3036; --card:#1E2025;
+  --cyan:#35B8E8; --magenta:#FF3D98; --yellow:#FFE23A; --dot:rgba(237,237,232,.12);
 }
 *,*::before,*::after{box-sizing:inherit}
-html{height:100%;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 120px)}
-body{margin:0;background:var(--paper);color:var(--ink);
-  font-family:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
-.wrap{max-width:640px;margin:0 auto;padding:0 18px 64px}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 120px)}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.55 var(--body);-webkit-text-size-adjust:100%}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:980px;margin:0 auto;padding:0 18px}
+.col{max-width:640px}
 
-header.hero{position:relative;padding:36px 0 18px}
-.switch{position:absolute;top:14px;right:0;display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);border-radius:999px;padding:6px 13px;font-size:14px;font-weight:700;font-stretch:85%;color:var(--ink);text-decoration:none;background:var(--paper)}
+header.hero{position:relative;padding:40px 0 28px;border-bottom:3px solid var(--ink);overflow:hidden}
+header.hero .wrap{position:relative}
+header.hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(var(--dot) 1.6px,transparent 1.7px);background-size:9px 9px;
+  -webkit-mask-image:linear-gradient(115deg,transparent 35%,#000 100%);mask-image:linear-gradient(115deg,transparent 35%,#000 100%);pointer-events:none}
+.switch{position:absolute;top:-26px;right:18px;z-index:1;display:inline-flex;align-items:center;border:2px solid var(--ink);border-radius:999px;padding:5px 13px;font:600 14px/1.2 var(--body);color:var(--ink);text-decoration:none;background:var(--card)}
 .switch:hover{background:var(--ink);color:var(--paper)}
-.switch:focus-visible{outline:3px solid var(--gift);outline-offset:2px}
-header.hero h1{margin-top:22px}
-h1{font-stretch:62%;font-weight:900;font-size:clamp(56px,17vw,104px);line-height:.86;
-  letter-spacing:-.01em;margin:0}
-.lede{margin:14px 0 0;color:var(--muted);max-width:34em}
-.progress{margin-top:22px;display:flex;align-items:center;gap:12px}
-.bar{flex:1;height:10px;background:var(--soft);border-radius:5px;overflow:hidden}
+h1{font:900 clamp(2.6rem,9vw,5.2rem)/.9 var(--display);margin:12px 0 14px;letter-spacing:.005em;max-width:12ch;position:relative}
+.lede{max-width:62ch;color:var(--muted);margin:0 0 20px;position:relative}
+.progress{display:flex;align-items:center;gap:12px;position:relative;max-width:640px}
+.bar{flex:1;height:12px;background:var(--card);border:2px solid var(--ink);overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:var(--rail);transition:width .4s ease}
-.count{font-stretch:75%;font-weight:700;font-size:15px;white-space:nowrap}
+.count{font:900 1.35rem/1 var(--display);white-space:nowrap}
 
-.controls{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);
-  padding:10px 0 12px;border-bottom:1px solid var(--hair)}
-.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.controls{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);padding:8px 0 10px;border-bottom:1px solid var(--line)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex:none;display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--hair);
-  background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:600;
-  font-stretch:85%;padding:7px 12px;border-radius:999px;cursor:pointer}
+.chip{flex:none;display:inline-flex;align-items:center;gap:7px;border:2px solid var(--line);background:transparent;color:var(--ink);font-size:.88rem;font-weight:500;padding:5px 11px;border-radius:999px}
 .chip .dot{width:10px;height:10px;border-radius:50%;background:var(--c)}
-.chip[aria-pressed="true"]{background:var(--c,var(--ink));border-color:var(--c,var(--ink));color:#fff}
+.chip[aria-pressed="true"]{background:var(--c,var(--ink));border-color:var(--c,var(--ink));color:var(--c-ink,#fff)}
+.chip[aria-pressed="true"]:not([style]){color:var(--paper)}
 .chip[aria-pressed="true"] .dot{background:#fff}
-.toggle{margin-top:10px;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
+.toggle{margin-top:8px;display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--muted)}
 .toggle input{width:18px;height:18px;accent-color:var(--ink)}
+.switch:focus-visible,.chip:focus-visible,.station:focus-visible,input:focus-visible,footer button:focus-visible,.acct button.link:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 
 .route{position:relative;margin-top:8px}
 .act{position:relative;padding:30px 0 6px 52px}
 .act::before{content:"";position:absolute;left:14px;top:0;bottom:0;width:6px;background:var(--rail);opacity:.18}
-.act h2{font-stretch:62%;font-weight:900;font-size:34px;line-height:1;margin:0}
+.act h2{font:900 2.3rem/1 var(--display);margin:0}
 .act .era{color:var(--muted);font-size:14px;margin-top:4px}
 .act .node{position:absolute;left:3px;top:30px;width:28px;height:28px;border-radius:7px;
   background:var(--rail);transform:rotate(45deg)}
@@ -78,20 +80,19 @@ h1{font-stretch:62%;font-weight:900;font-size:clamp(56px,17vw,104px);line-height
 .station svg{width:16px;height:16px;opacity:0}
 .stop.read .station{background:var(--rail)}
 .stop.read .station svg{opacity:1}
-.station:focus-visible,.chip:focus-visible{outline:3px solid var(--gift);outline-offset:2px}
-.num{font-stretch:75%;font-weight:700;font-size:13px;color:var(--muted)}
-.stop h3{margin:2px 0 0;font-size:19px;line-height:1.2;font-weight:800;font-stretch:90%}
+.num{font:700 .95rem/1.2 var(--display);letter-spacing:.02em;color:var(--muted)}
+.stop h3{margin:2px 0 0;font-size:1.15rem;line-height:1.25;font-weight:600}
 .stop.read h3{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--muted)}
 .by{color:var(--muted);font-size:14px;margin-top:2px}
 .why{margin:6px 0 0;max-width:36em}
 .tags{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px}
-.tag{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;font-stretch:85%}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:500}
 .tag i{width:9px;height:9px;border-radius:50%;background:var(--c)}
 .screen{margin-top:6px;font-size:14px;color:var(--muted)}
 .screen b{color:var(--ink);font-weight:600}
-.opt{font-size:13px;color:var(--muted);font-weight:600;margin-left:6px}
-.warn{margin-top:8px;font-size:14px;color:var(--warn);font-weight:600}
-.ed{margin-top:10px;border-left:3px solid var(--hair);padding:2px 0 2px 12px;font-size:14px}
+.opt{font:600 .8rem/1 var(--body);color:var(--muted);margin-left:6px}
+.warn{margin-top:8px;font-size:14px;color:var(--magenta);font-weight:600}
+.ed{margin-top:10px;border-left:3px solid var(--line);padding:2px 0 2px 12px;font-size:14px}
 .ed-h{color:var(--muted)}
 .ed-h b{color:var(--ink);font-weight:700}
 .ed ol{margin:4px 0 0;padding:0 0 0 18px}
@@ -99,45 +100,44 @@ h1{font-stretch:62%;font-weight:900;font-size:clamp(56px,17vw,104px);line-height
 .ed li.single{list-style:none;margin-left:-18px}
 .ed a{color:var(--ink);font-weight:600;text-underline-offset:3px}
 .ed .meta{color:var(--muted)}
-.ed .out{color:var(--warn)}
+.ed .out{color:var(--magenta)}
 .hidden{display:none}
 .empty{padding:30px 0 0 52px;color:var(--muted)}
 
-footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--hair);color:var(--muted);font-size:14px}
-footer button{font:inherit;color:var(--ink);background:none;border:1.5px solid var(--hair);
-  border-radius:999px;padding:6px 12px;cursor:pointer;margin-top:10px}
-.acct{margin-top:16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:14px;color:var(--muted)}
+footer{margin-top:40px;border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);font-size:.85rem}
+footer button{color:var(--ink);background:none;border:2px solid var(--line);border-radius:999px;padding:5px 12px;margin-top:10px}
+.acct{margin-top:16px;position:relative;max-width:640px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:14px;color:var(--muted)}
 .acct b{color:var(--ink);font-weight:600}
-.acct button.link{font:inherit;color:var(--ink);background:none;border:1.5px solid var(--hair);border-radius:999px;padding:5px 11px;cursor:pointer}
-.acct button.link:focus-visible{outline:3px solid var(--gift);outline-offset:2px}
+.acct button.link{color:var(--ink);background:none;border:2px solid var(--line);border-radius:999px;padding:5px 11px}
 #gbtn{min-height:40px}
+@media (max-width:640px){header.hero{padding:26px 0 20px}.switch{top:-16px}h1{margin-top:26px}}
 @media (prefers-reduced-motion: reduce){.bar i{transition:none}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="hero">
+<header class="hero">
+  <div class="wrap">
     <a class="switch" href="/">Películas y series</a>
     <h1>La ruta<br>Marvel</h1>
     <p class="lede">Los mejores cómics de Marvel en el orden en que ocurren, de Logan en el siglo XIX hasta el fin del multiverso. Cada parada indica qué tomos en castellano necesitas, con enlace a Panini. Toca el círculo de cada parada cuando la termines.</p>
     <div class="progress"><div class="bar"><i id="bar"></i></div><span class="count" id="count">0 de 0 leídos</span></div>
     <div class="acct" id="acct" aria-live="polite"></div>
-  </header>
+  </div>
+</header>
 
-  <div class="controls">
+<div class="controls"><div class="wrap">
     <div class="chips" id="chips" role="group" aria-label="Filtrar por línea"></div>
     <label class="toggle"><input type="checkbox" id="core"> Solo las imprescindibles</label>
-  </div>
+</div></div>
 
-  <main class="route" id="route"></main>
+<div class="wrap"><main class="route col" id="route"></main></div>
 
-  <footer>
+<footer><div class="wrap">
     Línea continua: imprescindible. Línea discontinua: opcional, para quien quiera más.<br>
     Los años indican cuándo se publicó cada obra.<br>
     <button id="reset" type="button">Borrar mi progreso</button><br><br>
-    <a href="/privacidad" style="color:inherit">Privacidad</a> · Guía personal, sin afiliación con Marvel ni Disney.
-  </footer>
-</div>
+    <a href="/privacidad" style="color:inherit">Privacidad</a> · <a href="/condiciones" style="color:inherit">Condiciones</a> · Guía personal, sin afiliación con Marvel ni Disney.
+</div></footer>
 
 <script>
 const LINES = {
