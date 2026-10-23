@@ -7,7 +7,7 @@
 //   PUT    /api/progress   {watched, country}         -> {ok, updated_at}
 //   GET    /api/comics                                -> {read, updated_at}
 //   PUT    /api/comics     {read}                     -> {ok, updated_at}
-//   GET    /api/rutas/<ruta>                          -> {read, updated_at}   (ruta: dc)
+//   GET    /api/rutas/<ruta>                          -> {read, updated_at}   (ruta: dc, biblioteca)
 //   PUT    /api/rutas/<ruta>  {read}                  -> {ok, updated_at}
 //   DELETE /api/account                               -> {ok}
 //
@@ -23,7 +23,7 @@ const MAX_KEY_LEN = 120;
 const GOOGLE_ISSUERS = ["accounts.google.com", "https://accounts.google.com"];
 const DEFAULT_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs";
 const CLOCK_SKEW_S = 120;
-const ROUTES = new Set(["dc"]);
+const ROUTES = new Set(["dc", "biblioteca"]);
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();

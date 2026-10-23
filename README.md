@@ -18,6 +18,7 @@ Página estática con 116 películas y series de Marvel comparadas con los arcos
 public/index.html           # la página entera: HTML, CSS, JS y datos en un solo archivo
 public/comics.html          # ruta de lectura de cómics Marvel (mismo inicio de sesión)
 public/dc.html              # ruta de lectura de cómics DC (misma estructura, progreso en route_progress)
+public/novelas.html         # biblioteca de novelas gráficas por estanterías (progreso en route_progress)
 public/_headers             # cabeceras de Cloudflare Pages (caché y seguridad)
 functions/api/[[path]].js   # API de cuentas y progreso (Pages Functions)
 migrations/                 # esquema de la base de datos D1 (0002 + 0003 cómics Marvel + 0004 otras rutas)
@@ -62,7 +63,7 @@ El Client ID de Google es público y está en `wrangler.toml` y en `public/index
 
 La ruta de cómics (`/comics`) usa la misma sesión: lo leído se guarda aparte, en `comic_progress`, y también se borra al borrar la cuenta. La ruta DC (`/dc`) guarda lo suyo en `route_progress`, una fila por usuario y ruta; para añadir otra ruta basta con sumarla a `ROUTES` en la API.
 
-API: `POST /api/google`, `POST /api/logout`, `GET /api/me`, `GET|PUT /api/progress`, `GET|PUT /api/comics`, `GET|PUT /api/rutas/dc`, `DELETE /api/account`.
+API: `POST /api/google`, `POST /api/logout`, `GET /api/me`, `GET|PUT /api/progress`, `GET|PUT /api/comics`, `GET|PUT /api/rutas/dc`, `GET|PUT /api/rutas/biblioteca`, `DELETE /api/account`.
 
 ## Aviso
 

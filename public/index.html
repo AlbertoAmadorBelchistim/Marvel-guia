@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
-@media (max-width:820px){.sections{position:static;justify-content:flex-end;flex-wrap:wrap;gap:5px;margin:0 0 16px}header.hero h1{margin-top:0}}
+@media (max-width:820px){.sections{position:static;justify-content:flex-end;flex-wrap:wrap;gap:4px;margin:0 0 16px}header.hero h1{margin-top:0}}
 </style></head><body>
 <!DOCTYPE html>
 <html lang="es">
@@ -183,7 +183,7 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
   .detail{grid-template-columns:1fr}
   .jump{display:none}
   header.hero{padding:26px 0 20px}
-  .sections a{font-size:13px;padding:4px 10px}
+  .sections a{font-size:12px;padding:4px 8px}
   
 }
 
@@ -219,7 +219,7 @@ footer{border-top:3px solid var(--ink);padding:18px 0 34px;color:var(--muted);fo
 <body>
 <header class="hero">
   <div class="wrap">
-    <nav class="sections" aria-label="Secciones"><a href="/" aria-current="page">Películas</a><a href="/comics">Cómics Marvel</a><a href="/dc">Cómics DC</a></nav>
+    <nav class="sections" aria-label="Secciones"><a href="/" aria-current="page">Películas</a><a href="/comics">Cómics Marvel</a><a href="/dc">Cómics DC</a><a href="/novelas">Novelas</a></nav>
     <h1 id="top">Marvel en pantalla, contra el cómic</h1>
     <p class="lede">Más de cien películas y series comparadas con los arcos que adaptan: cuánto respetan, qué cambian y si merece la pena verlas. Los porcentajes son una estimación personal y están aquí para discutirse.</p>
     <div class="tally" id="tally"></div>
@@ -752,7 +752,7 @@ function endSession(callServer){
   saveSession();
   try{if(window.google&&google.accounts)google.accounts.id.disableAutoSelect();}catch(e){}
   // En un equipo compartido, lo marcado no debe quedar a la vista del siguiente.
-  watched.clear();saveLocal();try{["rutaMarvel.leidos","rutaDC.leidos"].forEach(k=>localStorage.removeItem(k));}catch(e){}render();
+  watched.clear();saveLocal();try{["rutaMarvel.leidos","rutaDC.leidos","biblioteca.leidos"].forEach(k=>localStorage.removeItem(k));}catch(e){}render();
 }
 // --- Inicio de sesión con Google (Google Identity Services) ---
 const GOOGLE_CLIENT_ID="965357339286-prasf832d5odh57em5nmgrhc1kmoqn48.apps.googleusercontent.com";

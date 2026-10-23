@@ -113,16 +113,16 @@ footer button{color:var(--ink);background:none;border:2px solid var(--line);bord
 .acct b{color:var(--ink);font-weight:600}
 .acct button.link{color:var(--ink);background:none;border:2px solid var(--line);border-radius:999px;padding:5px 11px}
 #gbtn{min-height:40px}
-@media (max-width:640px){header.hero{padding:26px 0 20px}.sections a{font-size:13px;padding:4px 10px}}
+@media (max-width:640px){header.hero{padding:26px 0 20px}.sections a{font-size:12px;padding:4px 8px}}
 @media (prefers-reduced-motion: reduce){.bar i{transition:none}}
 
-@media (max-width:820px){.sections{position:static;justify-content:flex-end;flex-wrap:wrap;gap:5px;margin:0 0 16px}header.hero h1{margin-top:0}}
+@media (max-width:820px){.sections{position:static;justify-content:flex-end;flex-wrap:wrap;gap:4px;margin:0 0 16px}header.hero h1{margin-top:0}}
 </style>
 </head>
 <body>
 <header class="hero">
   <div class="wrap">
-    <nav class="sections" aria-label="Secciones"><a href="/">Películas</a><a href="/comics">Cómics Marvel</a><a href="/dc" aria-current="page">Cómics DC</a></nav>
+    <nav class="sections" aria-label="Secciones"><a href="/">Películas</a><a href="/comics">Cómics Marvel</a><a href="/dc" aria-current="page">Cómics DC</a><a href="/novelas">Novelas</a></nav>
     <h1>La ruta<br>DC</h1>
     <p class="lede">Los mejores cómics de DC en el orden en que ocurren, de Año Uno a hoy, y al final las grandes obras fuera de continuidad. Cada parada indica qué tomos en castellano necesitas, con enlace a Panini, que edita DC en España desde 2025. Toca el círculo de cada parada cuando la termines.</p>
     <div class="progress"><div class="bar"><i id="bar"></i></div><span class="count" id="count">0 de 0 leídos</span></div>
@@ -258,7 +258,7 @@ function endSession(callServer){
   saveSession();
   try{if(window.google&&google.accounts)google.accounts.id.disableAutoSelect()}catch(e){}
   // En un equipo compartido, lo marcado no debe quedar a la vista del siguiente.
-  try{["marvel.watched","rutaMarvel.leidos"].forEach(k=>localStorage.removeItem(k))}catch(e){}
+  try{["marvel.watched","rutaMarvel.leidos","biblioteca.leidos"].forEach(k=>localStorage.removeItem(k))}catch(e){}
   applyRemote([]);renderAcct();
 }
 let gisState="idle";
