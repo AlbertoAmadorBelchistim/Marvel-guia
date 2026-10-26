@@ -1,6 +1,7 @@
 // API de cuentas y progreso para la guía Marvel (Cloudflare Pages Functions + D1).
 //
 //   POST   /api/google     {credential}               -> {token, email, name}
+//   POST   /api/google/redirect  (formulario de Google) -> 303 a la página de origen con #sesion=…
 //   POST   /api/logout                                -> {ok}
 //   GET    /api/me                                    -> {email, name}
 //   GET    /api/progress                              -> {watched, country, updated_at}
@@ -152,6 +153,41 @@ function cleanWatched(list) {
 }
 const cleanCountry = (c) => (typeof c === "string" && /^[a-z]{2}$/.test(c) ? c : null);
 
+// --- inicio de sesión con Google -------------------------------------------------
+// Verifica el ID token, crea o actualiza el usuario y abre una sesión propia.
+async function loginWithGoogle(db, env, credential, now, nonce) {
+  const clientId = env.GOOGLE_CLIENT_ID;
+  if (!clientId) throw Object.assign(new Error("no_client_id"), { status: 500 });
+  let claims;
+  try {
+    claims = await verifyGoogleIdToken(credential, clientId, env.GOOGLE_JWKS_URL || DEFAULT_JWKS_URL);
+    if (nonce !== undefined && (!nonce || claims.nonce !== nonce)) throw new Error("bad_nonce");
+  } catch (e) {
+    console.warn("google token rechazado:", e && e.message);
+    throw Object.assign(new Error("bad_google_token"), { status: 401 });
+  }
+  const email = String(claims.email).toLowerCase().slice(0, 254);
+  const name = claims.name ? String(claims.name).slice(0, 120) : null;
+  let user = await db.prepare("SELECT id FROM users WHERE google_sub = ?").bind(String(claims.sub)).first();
+  if (user) {
+    await db.prepare("UPDATE users SET email = ?, name = ?, last_login = ? WHERE id = ?").bind(email, name, now, user.id).run();
+  } else {
+    user = { id: crypto.randomUUID() };
+    await db
+      .prepare("INSERT INTO users (id, google_sub, email, name, created_at, last_login) VALUES (?, ?, ?, ?, ?, ?)")
+      .bind(user.id, String(claims.sub), email, name, now, now)
+      .run();
+  }
+  await db.prepare("DELETE FROM sessions WHERE user_id = ? AND expires_at < ?").bind(user.id, now).run();
+  const token = await createSession(db, user.id, now);
+  return { token, email, name };
+}
+function getCookie(request, name) {
+  const m = (request.headers.get("cookie") || "").match(new RegExp("(?:^|;\\s*)" + name + "=([^;]*)"));
+  return m ? decodeURIComponent(m[1]) : "";
+}
+const RETURN_PATHS = new Set(["/", "/comics", "/dc", "/novelas", "/manga"]);
+
 // --- rutas ------------------------------------------------------------------------
 export async function onRequest(context) {
   const { request, env, params } = context;
@@ -162,6 +198,32 @@ export async function onRequest(context) {
   const method = request.method.toUpperCase();
   const now = Date.now();
 
+  // Acceso con Google por redirección (sin ventana emergente): Google envía un formulario.
+  // Protección CSRF: el ID token debe llevar el nonce que la página guardó en una cookie propia.
+  if (path === "/google/redirect" && method === "POST") {
+    const back = RETURN_PATHS.has(getCookie(request, "volver")) ? getCookie(request, "volver") : "/";
+    const clear = "; Path=/; Max-Age=0; Secure; SameSite=None";
+    const go = (hash) =>
+      new Response(null, {
+        status: 303,
+        headers: [
+          ["location", new URL(back, request.url).toString() + hash],
+          ["cache-control", "no-store"],
+          ["set-cookie", "volver=" + clear],
+          ["set-cookie", "gnonce=" + clear],
+        ],
+      });
+    try {
+      const form = await request.formData();
+      const r = await loginWithGoogle(db, env, String(form.get("credential") || ""), now, getCookie(request, "gnonce"));
+      const payload = bytesToB64url(enc.encode(JSON.stringify(r)));
+      return go("#sesion=" + payload);
+    } catch (e) {
+      console.warn("acceso por redirección fallido:", e && e.message);
+      return go("#sesion=error");
+    }
+  }
+
   // Solo cuerpos JSON en las escrituras (un formulario de otra web no puede enviarlos sin CORS).
   if (method !== "GET" && method !== "HEAD" && !(method === "POST" && path === "/logout") && method !== "DELETE") {
     if (!(request.headers.get("content-type") || "").includes("application/json"))
@@ -170,31 +232,14 @@ export async function onRequest(context) {
 
   try {
     if (path === "/google" && method === "POST") {
-      const clientId = env.GOOGLE_CLIENT_ID;
-      if (!clientId) return err(500, "no_client_id", "Falta configurar el inicio de sesión con Google.");
       const body = await readJson(request);
-      let claims;
       try {
-        claims = await verifyGoogleIdToken(body.credential, clientId, env.GOOGLE_JWKS_URL || DEFAULT_JWKS_URL);
+        return json(await loginWithGoogle(db, env, body.credential, now));
       } catch (e) {
-        console.warn("google token rechazado:", e && e.message);
-        return err(401, "bad_google_token", "No se ha podido verificar el inicio de sesión con Google. Inténtalo de nuevo.");
+        if (e.status === 401) return err(401, "bad_google_token", "No se ha podido verificar el inicio de sesión con Google. Inténtalo de nuevo.");
+        if (e.message === "no_client_id") return err(500, "no_client_id", "Falta configurar el inicio de sesión con Google.");
+        throw e;
       }
-      const email = String(claims.email).toLowerCase().slice(0, 254);
-      const name = claims.name ? String(claims.name).slice(0, 120) : null;
-      let user = await db.prepare("SELECT id FROM users WHERE google_sub = ?").bind(String(claims.sub)).first();
-      if (user) {
-        await db.prepare("UPDATE users SET email = ?, name = ?, last_login = ? WHERE id = ?").bind(email, name, now, user.id).run();
-      } else {
-        user = { id: crypto.randomUUID() };
-        await db
-          .prepare("INSERT INTO users (id, google_sub, email, name, created_at, last_login) VALUES (?, ?, ?, ?, ?, ?)")
-          .bind(user.id, String(claims.sub), email, name, now, now)
-          .run();
-      }
-      await db.prepare("DELETE FROM sessions WHERE user_id = ? AND expires_at < ?").bind(user.id, now).run();
-      const token = await createSession(db, user.id, now);
-      return json({ token, email, name });
     }
 
     const user = await currentUser(request, db, now);

@@ -234,6 +234,27 @@ function loadSession(){acct.token=null;acct.email=null;acct.name="";
   try{const s=JSON.parse(localStorage.getItem(SESSION_KEY)||"null");if(s&&s.token&&s.email){acct.token=s.token;acct.email=s.email;acct.name=s.name||""}}catch(e){}}
 function saveSession(){try{acct.token?localStorage.setItem(SESSION_KEY,JSON.stringify({token:acct.token,email:acct.email,name:acct.name})):localStorage.removeItem(SESSION_KEY)}catch(e){}}
 loadSession();
+
+// Vuelta del acceso con Google por redirección: #sesion=<datos> o #sesion=error
+let loginError=false;
+(function sessionFromHash(){
+  const m=location.hash.match(/^#sesion=([A-Za-z0-9_-]+)$/);if(!m)return;
+  history.replaceState(null,"",location.pathname+location.search);
+  if(m[1]==="error"){loginError=true;return}
+  try{
+    const b=m[1].replace(/-/g,"+").replace(/_/g,"/");
+    const r=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(b+"===".slice((b.length+3)%4)),c=>c.charCodeAt(0))));
+    if(r&&r.token&&r.email){acct.token=r.token;acct.email=r.email;acct.name=r.name||"";saveSession()}
+  }catch(e){loginError=true}
+})();
+function gisNonce(){
+  const a=new Uint8Array(16);crypto.getRandomValues(a);
+  const n=[...a].map(x=>x.toString(16).padStart(2,"0")).join("");
+  const opt="; Path=/; Max-Age=1800; Secure; SameSite=None";
+  document.cookie="gnonce="+n+opt;
+  document.cookie="volver="+encodeURIComponent(location.pathname.replace(/\.html$/,"")||"/")+opt;
+  return n;
+}
 async function api(method,path,body){
   const headers={};
   if(body!==undefined)headers["content-type"]="application/json";
@@ -285,7 +306,7 @@ let gisState="idle";
 function loadGis(){
   if(gisState!=="idle")return;gisState="loading";
   const s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";s.async=true;
-  s.onload=()=>{try{google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:onGoogleCredential,auto_select:false,cancel_on_tap_outside:true,use_fedcm_for_button:true,context:"signin",ux_mode:"popup"});gisState="ready"}catch(e){gisState="error"}renderAcct()};
+  s.onload=()=>{try{google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:onGoogleCredential,auto_select:false,cancel_on_tap_outside:true,context:"signin",ux_mode:"redirect",login_uri:location.origin+"/api/google/redirect",nonce:gisNonce()});gisState="ready"}catch(e){gisState="error"}renderAcct()};
   s.onerror=()=>{gisState="error";renderAcct()};
   document.head.append(s);
 }
@@ -312,6 +333,7 @@ function renderAcct(){
     out.onclick=()=>endSession(true);
     box.append(who,st,out);
   }else{
+    if(loginError){const er=document.createElement("span");er.textContent="No se ha podido iniciar sesión con Google. Inténtalo de nuevo.";er.style.color="var(--magenta)";box.append(er)}
     const p=document.createElement("span");p.textContent="Tu progreso se guarda en este navegador. Entra con Google para tenerlo en todos tus dispositivos.";
     const g=document.createElement("div");g.id="gbtn";
     box.append(p,g);
